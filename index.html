@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RS Chat</title>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#075e54">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Courier New', monospace; background: #0d1117; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: #c9d1d9; }
