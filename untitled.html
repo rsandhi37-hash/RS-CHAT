@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>RS Chat</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Courier New', monospace; background: #0d1117; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: #c9d1d9; }
+        .header { background: #161b22; color: #58a6ff; padding: 20px; text-align: center; font-weight: bold; border-bottom: 1px solid #30363d; z-index: 100; }
+        #display { flex: 1; overflow-y: auto; padding: 20px 15px 150px; display: flex; flex-direction: column; gap: 12px; }
+        .bubble { max-width: 85%; padding: 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; }
+        .sent { background: #238636; color: white; align-self: flex-end; }
+        .received { background: #30363d; color: #58a6ff; align-self: flex-start; }
+        .controls { background: #161b22; padding: 15px; position: fixed; bottom: 0; width: 100%; border-top: 1px solid #30363d; z-index: 100; }
+        input { width: 100%; padding: 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #58a6ff; margin-bottom: 12px; outline: none; font-size: 16px; }
+        .btn-group { display: flex; gap: 10px; }
+        button { flex: 1; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .dec-btn { background: #1f6feb; }
+        .enc-btn { background: #238636; }
+    </style>
+</head>
+<body>
+
+<div class="header">RS CHAT // SECURE TERMINAL</div>
+<div id="display"></div>
+
+<div class="controls">
+    <input type="text" id="userInput" placeholder="Type or paste code..." autocomplete="off">
+    <div class="btn-group">
+        <button class="dec-btn" onclick="handleDecrypt()">🔓 DECODE</button>
+        <button class="enc-btn" onclick="handleEncrypt()">🔒 SEND</button>
+    </div>
+</div>
+
+<script>
+    const MASTER_KEY = "REHAN_SANDHI_181";
+    const syms = ["%", "$", "#", "@", "!", "+", "×", "÷", "=", "?", ";", ":", "•", "~", "_", "/"];
+    const separator = "§"; // Unique internal separator
+
+    function getKeyWeight(key) {
+        let weight = 0;
+        for (let i = 0; i < key.length; i++) { weight += key.charCodeAt(i); }
+        return weight;
+    }
+
+    function getSalt() {
+        const d = new Date();
+        return d.getHours() + Math.floor(d.getMinutes() / 10);
+    }
+
+    function handleEncrypt() {
+        const text = document.getElementById('userInput').value;
+        if (!text) return;
+
+        const salt = getSalt();
+        const weight = getKeyWeight(MASTER_KEY);
+        let encrypted = "";
+
+        for (let i = 0; i < text.length; i++) {
+            let code = text.charCodeAt(i) + salt + weight;
+            let hex = code.toString(16);
+            
+            // Symbol masking
+            let s1 = syms[Math.floor(Math.random() * syms.length)];
+            let s2 = syms[Math.floor(Math.random() * syms.length)];
+            
+            // Humne ab har hex pair ke beech separator dala hai taaki decoding me mix na ho
+            encrypted += s1 + hex + s2 + separator;
+        }
+
+        addBubble(text, 'sent');
+        document.getElementById('userInput').value = "";
+        window.open(`https://wa.me/?text=${encodeURIComponent(encrypted)}`, '_blank');
+    }
+
+    function handleDecrypt() {
+        const input = document.getElementById('userInput').value;
+        if (!input) return;
+
+        const salt = getSalt();
+        const weight = getKeyWeight(MASTER_KEY);
+        
+        // Split by our unique separator
+        let segments = input.split(separator);
+        let decoded = "";
+
+        try {
+            segments.forEach(seg => {
+                if (seg.trim()) {
+                    // Sirf hex characters extract karna (0-9, a-f)
+                    let hex = seg.match(/[0-9a-fA-F]+/);
+                    if (hex) {
+                        let num = parseInt(hex[0], 16);
+                        decoded += String.fromCharCode(num - salt - weight);
+                    }
+                }
+            });
+
+            if (decoded && decoded.length > 0) {
+                addBubble("Decoded: " + decoded, 'received');
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            addBubble("Error: Invalid Code or Expired!", "received");
+        }
+        document.getElementById('userInput').value = "";
+    }
+
+    function addBubble(text, type) {
+        const win = document.getElementById('display');
+        const div = document.createElement('div');
+        div.className = `bubble ${type}`;
+        div.innerText = text;
+        win.appendChild(div);
+        win.scrollTop = win.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
