@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RS Chat Secure</title>
     
+    <!-- Meta Tags -->
     <meta property="og:title" content="RS Chat Secure">
     <meta property="og:description" content="Ultra-Secure Terminal by Rehan Sandhi">
     <meta property="og:image" content="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s16000/16471.jpg">
     <meta property="og:url" content="https://rsandhi37-hash.github.io/RS-CHAT/">
 
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d1117">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,42 +19,212 @@
     <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s192/16471.jpg">
     
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        body { font-family: 'Courier New', monospace; background: #0d1117; color: #c9d1d9; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        #installPrompt { position: fixed; inset: 0; background: #0d1117; display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; text-align: center; }
-        .install-card { background: #161b22; border: 2px solid #58a6ff; border-radius: 20px; padding: 40px; max-width: 400px; }
-        .install-button { background: #238636; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%; }
-        #pinScreen { position: fixed; inset: 0; background: #0d1117; display: none; justify-content: center; align-items: center; z-index: 9000; }
-        .pin-container { background: #161b22; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; border: 1px solid #30363d; }
-        .pin-display { background: #0d1117; border: 1px solid #30363d; padding: 15px; text-align: center; font-size: 24px; color: #58a6ff; margin-bottom: 20px; border-radius: 10px; }
-        .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .pin-key { background: #21262d; border: none; color: white; padding: 15px; font-size: 20px; border-radius: 10px; cursor: pointer; }
-        .pin-key:active { background: #30363d; }
-        .pin-key.enter { background: #238636; }
-        .pin-key.del { background: #da3633; }
-        #mainApp { display: none; height: 100vh; flex-direction: column; }
-        .header { background: #161b22; color: #58a6ff; padding: 20px; text-align: center; font-weight: bold; border-bottom: 1px solid #30363d; }
-        #display { flex: 1; overflow-y: auto; padding: 20px 15px 160px; display: flex; flex-direction: column; gap: 10px; }
-        .bubble { max-width: 85%; padding: 10px; border-radius: 10px; font-size: 14px; word-wrap: break-word; }
-        .sent { background: #238636; align-self: flex-end; }
-        .received { background: #30363d; align-self: flex-start; }
-        .controls { background: #161b22; padding: 15px; position: fixed; bottom: 0; width: 100%; border-top: 1px solid #30363d; }
-        input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #58a6ff; margin-bottom: 10px; outline: none; }
-        .btn-group { display: flex; gap: 10px; }
-        button.action-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
-        .dec-btn { background: #1f6feb; }
-        .enc-btn { background: #238636; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #0d1117; 
+            color: #c9d1d9; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        
+        #installPrompt { 
+            position: fixed; 
+            inset: 0; 
+            background: #0d1117; 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 10000; 
+            padding: 20px; 
+            text-align: center; 
+        }
+        
+        .install-card { 
+            background: #161b22; 
+            border: 2px solid #58a6ff; 
+            border-radius: 20px; 
+            padding: 40px; 
+            max-width: 400px; 
+        }
+        
+        .install-button { 
+            background: #238636; 
+            color: white; 
+            border: none; 
+            padding: 15px 30px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            width: 100%; 
+        }
+        
+        #pinScreen { 
+            position: fixed; 
+            inset: 0; 
+            background: #0d1117; 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9000; 
+        }
+        
+        .pin-container { 
+            background: #161b22; 
+            padding: 30px; 
+            border-radius: 20px; 
+            width: 90%; 
+            max-width: 350px; 
+            border: 1px solid #30363d; 
+        }
+        
+        .pin-display { 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            padding: 15px; 
+            text-align: center; 
+            font-size: 24px; 
+            color: #58a6ff; 
+            margin-bottom: 20px; 
+            border-radius: 10px; 
+            letter-spacing: 5px;
+        }
+        
+        .pin-keypad { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+        }
+        
+        .pin-key { 
+            background: #21262d; 
+            border: none; 
+            color: white; 
+            padding: 15px; 
+            font-size: 20px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+        }
+        
+        .pin-key:active { 
+            background: #30363d; 
+        }
+        
+        .pin-key.enter { 
+            background: #238636; 
+        }
+        
+        .pin-key.del { 
+            background: #da3633; 
+        }
+        
+        #mainApp { 
+            display: none; 
+            height: 100vh; 
+            flex-direction: column; 
+        }
+        
+        .header { 
+            background: #161b22; 
+            color: #58a6ff; 
+            padding: 20px; 
+            text-align: center; 
+            font-weight: bold; 
+            border-bottom: 1px solid #30363d; 
+        }
+        
+        #display { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px 15px 160px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        
+        .bubble { 
+            max-width: 85%; 
+            padding: 10px; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            word-wrap: break-word; 
+        }
+        
+        .sent { 
+            background: #238636; 
+            align-self: flex-end; 
+        }
+        
+        .received { 
+            background: #30363d; 
+            align-self: flex-start; 
+        }
+        
+        .controls { 
+            background: #161b22; 
+            padding: 15px; 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            border-top: 1px solid #30363d; 
+        }
+        
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            border-radius: 8px; 
+            color: #58a6ff; 
+            margin-bottom: 10px; 
+            outline: none; 
+        }
+        
+        .btn-group { 
+            display: flex; 
+            gap: 10px; 
+        }
+        
+        button.action-btn { 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+        
+        .dec-btn { 
+            background: #1f6feb; 
+        }
+        
+        .enc-btn { 
+            background: #238636; 
+        }
     </style>
 </head>
 <body>
+    <!-- Install Prompt -->
     <div id="installPrompt">
         <div class="install-card">
             <h2>🔐 RS CHAT SECURE</h2>
             <p style="margin: 15px 0; color: #8b949e;">Install karein private chat ke liye</p>
             <button class="install-button" id="btnInstall">📲 INSTALL APP</button>
+            <p style="margin-top: 15px; font-size: 12px; color: #6e7681;">Ya browser menu se "Add to Home Screen" karein</p>
         </div>
     </div>
 
+    <!-- PIN Screen -->
     <div id="pinScreen">
         <div class="pin-container">
             <h3 style="text-align: center; margin-bottom: 15px; color: #58a6ff;">ENTER PIN</h3>
@@ -61,6 +233,7 @@
         </div>
     </div>
 
+    <!-- Main App -->
     <div id="mainApp">
         <div class="header">⚡ RS CHAT // SECURE TERMINAL ⚡</div>
         <div id="display"></div>
@@ -74,81 +247,211 @@
     </div>
 
     <script>
+        // ========== CONFIGURATION ==========
         const APP_PIN = "1818";
         const MASTER_KEY = "REHAN_SANDHI_181";
         const syms = ["%", "$", "#", "@", "!", "+", "×", "÷", "=", "?", ";", ":", "•", "~", "_", "/"];
         const separator = "§";
+        
+        // ========== GLOBAL VARIABLES ==========
         let currentPin = "";
+        let isUnlocked = false;
         let deferredPrompt;
 
+        // ========== SERVICE WORKER ==========
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered!'))
+                .catch(err => console.log('SW failed:', err));
         }
 
+        // ========== PWA INSTALL ==========
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (!window.matchMedia('(display-mode: standalone)').matches) {
+            
+            // Check if already installed
+            if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
                 document.getElementById('installPrompt').style.display = 'flex';
             }
         });
 
+        // Install button click
         document.getElementById('btnInstall').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    deferredPrompt = null;
-                    location.reload();
-                }
-            } else {
+            if (!deferredPrompt) {
                 alert('Browser menu se "Add to Home Screen" karein');
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                deferredPrompt = null;
+                location.reload();
             }
         });
 
+        // ========== PAGE LOAD ==========
         window.addEventListener('load', () => {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            
             if (isStandalone) {
+                // App installed mode
+                document.getElementById('installPrompt').style.display = 'none';
                 document.getElementById('pinScreen').style.display = 'flex';
                 renderKeypad();
             } else {
+                // Browser mode - show install prompt
                 document.getElementById('installPrompt').style.display = 'flex';
             }
         });
 
+        // ========== PIN KEYPAD FUNCTIONS ==========
         function renderKeypad() {
             const pad = document.getElementById('keypad');
+            if (!pad) return;
+            
             pad.innerHTML = "";
             const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'DEL', 0, 'OK'];
-            keys.forEach(val => {
+            
+            keys.forEach(value => {
                 const btn = document.createElement('button');
-                btn.className = 'pin-key' + (val === 'DEL' ? ' del' : val === 'OK' ? ' enter' : '');
-                btn.textContent = val;
-                btn.onclick = () => {
-                    if (val === 'DEL') { currentPin = currentPin.slice(0, -1); updatePinDisplay(); }
-                    else if (val === 'OK') verifyPin();
-                    else if (currentPin.length < 4) { currentPin += val; updatePinDisplay(); }
+                btn.className = 'pin-key';
+                btn.textContent = value;
+                
+                if (value === 'DEL') btn.classList.add('del');
+                if (value === 'OK') btn.classList.add('enter');
+                
+                btn.onclick = function() {
+                    if (value === 'DEL') delPin();
+                    else if (value === 'OK') verifyPin();
+                    else addPin(value.toString());
                 };
+                
                 pad.appendChild(btn);
             });
         }
 
+        function addPin(v) {
+            if (currentPin.length < 4) {
+                currentPin += v;
+                updatePinDisplay();
+            }
+        }
+
+        function delPin() {
+            currentPin = currentPin.slice(0, -1);
+            updatePinDisplay();
+        }
+
         function updatePinDisplay() {
-            const dots = '●'.repeat(currentPin.length);
-            const circles = '○'.repeat(4 - currentPin.length);
-            document.getElementById('pinDisplay').textContent = dots + circles;
+            const display = document.getElementById('pinDisplay');
+            if (display) {
+                let dots = '';
+                for(let i = 0; i < currentPin.length; i++) {
+                    dots += '●';
+                }
+                let circles = '';
+                for(let i = 0; i < 4 - currentPin.length; i++) {
+                    circles += '○';
+                }
+                display.textContent = dots + circles;
+            }
         }
 
         function verifyPin() {
             if (currentPin === APP_PIN) {
+                isUnlocked = true;
                 document.getElementById('pinScreen').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'flex';
             } else {
-                alert('❌ Wrong PIN!');
+                alert('❌ Wrong PIN! Try again.');
                 currentPin = '';
                 updatePinDisplay();
             }
         }
+
+        // ========== ENCRYPTION FUNCTIONS ==========
+        function getWeight() {
+            let w = 0;
+            for (let i = 0; i < MASTER_KEY.length; i++) {
+                w += MASTER_KEY.charCodeAt(i);
+            }
+            return w;
+        }
+
+        function getSalt() {
+            const d = new Date();
+            return d.getHours() + Math.floor(d.getMinutes() / 10);
+        }
+
+        function handleEncrypt() {
+            const text = document.getElementById('userInput').value.trim();
+            if (!text) return;
+            
+            const salt = getSalt();
+            const weight = getWeight();
+            let encrypted = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                const hex = (text.charCodeAt(i) + salt + weight).toString(16);
+                encrypted += syms[Math.floor(Math.random() * syms.length)] + hex + 
+                            syms[Math.floor(Math.random() * syms.length)] + separator;
+            }
+            
+            // Add to chat
+            addBubble(text, 'sent');
+            document.getElementById('userInput').value = '';
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(encrypted).then(() => {
+                console.log('Copied!');
+            }).catch(() => {
+                alert('Copy this: ' + encrypted);
+            });
+            
+            // Open WhatsApp
+            window.open(`https://wa.me/?text=${encodeURIComponent(encrypted)}`, '_blank');
+        }
+
+        function handleDecrypt() {
+            const input = document.getElementById('userInput').value.trim();
+            if (!input) return;
+            
+            const salt = getSalt();
+            const weight = getWeight();
+            let decrypted = '';
+            
+            try {
+                const segments = input.split(separator);
+                segments.forEach(seg => {
+                    const hexMatch = seg.match(/[0-9a-fA-F]+/);
+                    if (hexMatch) {
+                        const charCode = parseInt(hexMatch[0], 16) - salt - weight;
+                        decrypted += String.fromCharCode(charCode);
+                    }
+                });
+                
+                addBubble(decrypted || '[EMPTY]', 'received');
+            } catch (e) {
+                alert('❌ Invalid encrypted code!');
+            }
+            
+            document.getElementById('userInput').value = '';
+        }
+
+        function addBubble(text, type) {
+            const display = document.getElementById('display');
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${type}`;
+            bubble.textContent = text;
+            display.appendChild(bubble);
+            display.scrollTop = display.scrollHeight;
+        }
+    </script>
+</body>
+</html>        }
 
         function getWeight() {
             let w = 0;
