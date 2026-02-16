@@ -82,26 +82,37 @@
     const separator = "§";
     let currentPin = "";
     let isUnlocked = false;
+    let deferredPrompt;  // ✅ YAHAN DEFINE KARNA ZAROORI HAI
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
     }
 
-    let deferredPrompt;
+    // ✅ SAHI EVENT LISTENER
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
+        
+        // Install prompt dikhana hai kya?
         if (!window.matchMedia('(display-mode: standalone)').matches) {
             document.getElementById('installPrompt').style.display = 'flex';
         }
     });
 
+    // ✅ INSTALL BUTTON CLICK HANDLER
     document.getElementById('btnInstall').addEventListener('click', async () => {
         if (deferredPrompt) {
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') location.reload();
-        } else { alert("Menu se 'Add to Home Screen' karein."); }
+            if (outcome === 'accepted') {
+                deferredPrompt = null;
+                location.reload();
+            } else {
+                alert("Browser ke 3-dots menu mein ja kar 'Install App' ya 'Add to Home Screen' par click karein.");
+            }
+        } else {
+            alert("Install prompt available nahi hai. Browser menu se install karein.");
+        }
     });
 
     window.addEventListener('load', () => {
@@ -114,29 +125,72 @@
         }
     });
 
+    // ✅ SAHI RENDER KEYPAD FUNCTION
     function renderKeypad() {
         const pad = document.getElementById('keypad');
         pad.innerHTML = "";
-        [1,2,3,4,5,6,7,8,9,'DEL',0,'OK'].forEach(v => {
-            let b = document.createElement('button');
-            b.className = 'pin-key' + (v=='DEL'?' del':v=='OK'?' enter':'');
-            b.innerText = v;
-            b.onclick = () => v=='DEL'?delPin():v=='OK'?verifyPin():addPin(v);
-            pad.appendChild(b);
+        
+        const keys = [1,2,3,4,5,6,7,8,9,'DEL',0,'OK'];
+        
+        keys.forEach(value => {
+            let btn = document.createElement('button');
+            btn.className = 'pin-key';
+            
+            if (value === 'DEL') btn.classList.add('del');
+            if (value === 'OK') btn.classList.add('enter');
+            
+            btn.innerText = value;
+            
+            // ✅ SAHI EVENT LISTENER
+            btn.addEventListener('click', () => {
+                if (value === 'DEL') delPin();
+                else if (value === 'OK') verifyPin();
+                else addPin(value.toString());
+            });
+            
+            pad.appendChild(btn);
         });
     }
-    function addPin(v) { if(currentPin.length < 4) { currentPin += v; updatePinDisp(); } }
-    function delPin() { currentPin = currentPin.slice(0,-1); updatePinDisp(); }
-    function updatePinDisp() { document.getElementById('pinDisplay').innerText = "●".repeat(currentPin.length) + "○".repeat(4-currentPin.length); }
+
+    function addPin(v) { 
+        if(currentPin.length < 4) { 
+            currentPin += v; 
+            updatePinDisp(); 
+        } 
+    }
+
+    function delPin() { 
+        currentPin = currentPin.slice(0,-1); 
+        updatePinDisp(); 
+    }
+
+    function updatePinDisp() { 
+        document.getElementById('pinDisplay').innerText = "●".repeat(currentPin.length) + "○".repeat(4-currentPin.length); 
+    }
+
     function verifyPin() {
         if(currentPin === APP_PIN) {
             isUnlocked = true;
             document.getElementById('pinScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'flex';
-        } else { alert("Wrong PIN!"); currentPin = ""; updatePinDisp(); }
+        } else { 
+            alert("Wrong PIN!"); 
+            currentPin = ""; 
+            updatePinDisp(); 
+        }
     }
-    function getWeight() { let w = 0; for(let i=0; i<MASTER_KEY.length; i++) w += MASTER_KEY.charCodeAt(i); return w; }
-    function getSalt() { let d = new Date(); return d.getHours() + Math.floor(d.getMinutes()/10); }
+
+    function getWeight() { 
+        let w = 0; 
+        for(let i=0; i<MASTER_KEY.length; i++) w += MASTER_KEY.charCodeAt(i); 
+        return w; 
+    }
+
+    function getSalt() { 
+        let d = new Date(); 
+        return d.getHours() + Math.floor(d.getMinutes()/10); 
+    }
+
     function handleEncrypt() {
         let text = document.getElementById('userInput').value;
         if(!text) return;
@@ -150,6 +204,7 @@
         navigator.clipboard.writeText(enc);
         window.open(`https://wa.me/?text=${encodeURIComponent(enc)}`, '_blank');
     }
+
     function handleDecrypt() {
         let input = document.getElementById('userInput').value;
         if(!input) return;
@@ -163,6 +218,7 @@
         } catch(e) { alert("Invalid Code!"); }
         document.getElementById('userInput').value = "";
     }
+
     function addBubble(t, c) {
         let d = document.getElementById('display');
         let b = document.createElement('div');
@@ -171,6 +227,7 @@
         d.appendChild(b);
         d.scrollTop = d.scrollHeight;
     }
+                            
 </script>
 </body>
 </html>
