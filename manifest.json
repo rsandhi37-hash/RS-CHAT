@@ -1,15 +1,16 @@
 {
   "name": "RS Chat Secure",
   "short_name": "RSChat",
-  "start_url": "index.html",
+  "description": "Ultra-Secure Terminal by Rehan Sandhi",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d1117",
   "theme_color": "#0d1117",
   "icons": [
     {
-      "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s16000/16471.jpgRQeIJ15w-FXqzW4jDpysyKVU96FHUJBs-sd2VI3SP21TNPvR6fZmQdaaZ6tEvsw1-KJMufT1VM0R2ki6mCQwNEIWMmtmyOQ/w256-h256-p-k-no-nu/14805.webp",
-      "sizes": "256x256",
-      "type": "image/webp",
+      "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s16000/16471.jpg",
+      "sizes": "512x512",
+      "type": "image/jpg",
       "purpose": "any maskable"
     }
   ]
