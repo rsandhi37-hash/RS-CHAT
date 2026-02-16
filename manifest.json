@@ -1,91 +1,16 @@
 {
   "name": "RS Chat Secure",
-  "short_name": "RS Chat",
-  "description": "End-to-End Encrypted Secure Chat",
-  "theme_color": "#0d1117",
-  "background_color": "#0d1117",
+  "short_name": "RSChat",
+  "start_url": "index.html",
   "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/",
-  "start_url": "/",
-  "id": "/",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
   "icons": [
     {
-      "src": "icons/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/512/512651.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/chat1.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Secure Chat Interface"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "New Secret Chat",
-      "short_name": "New Chat",
-      "description": "Start new encrypted conversation",
-      "url": "/?new",
-      "icons": [{ "src": "icons/shortcut.png", "sizes": "192x192" }]
-    }
-  ],
-  "categories": ["communication", "security", "social"],
-  "lang": "hi",
-  "dir": "ltr",
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "protocol_handlers": [
-    {
-      "protocol": "web+rschat",
-      "url": "/?message=%s"
     }
   ]
 }
