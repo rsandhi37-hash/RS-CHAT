@@ -88,8 +88,14 @@
     let isUnlocked = false;
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-    }
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=2').then(reg => {
+            console.log('SW Registered');
+            // Naye update ko foran apply karne ke liye
+            reg.update();
+        });
+    });
+}
 
     window.addEventListener('load', () => {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
