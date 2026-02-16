@@ -1,31 +1,34 @@
-const CACHE_NAME = 'rs-chat-v1';
-const urlsToCache = ['index.html', 'manifest.json'];
+const CACHE_NAME = 'rs-chat-v2'; // Version changed to v2
+const urlsToCache = [
+  './',
+  'index.html',
+  'manifest.json'
+];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)));
-});
-
-self.addEventListener('fetch', (event) => {
-  event.respondWith(caches.match(event.request).then((response) => response || fetch(event.request)));
-});
-        action: 'close',
-        title: 'Close'
-      }
-    ]
-  };
-  
   event.waitUntil(
-    self.registration.showNotification('RS Chat', options)
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-// Handle notification clicks
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  
-  if (event.action === 'open') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  }
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
 });
