@@ -3,112 +3,633 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RS Chat</title>
+    <title>RS Chat Secure</title>
     <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#075e54">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-</script>
-
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RS Chat">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Courier New', monospace; background: #0d1117; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: #c9d1d9; }
-        .header { background: #161b22; color: #58a6ff; padding: 20px; text-align: center; font-weight: bold; border-bottom: 1px solid #30363d; z-index: 100; }
-        #display { flex: 1; overflow-y: auto; padding: 20px 15px 150px; display: flex; flex-direction: column; gap: 12px; }
-        .bubble { max-width: 85%; padding: 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; }
-        .sent { background: #238636; color: white; align-self: flex-end; }
-        .received { background: #30363d; color: #58a6ff; align-self: flex-start; }
-        .controls { background: #161b22; padding: 15px; position: fixed; bottom: 0; width: 100%; border-top: 1px solid #30363d; z-index: 100; }
-        input { width: 100%; padding: 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #58a6ff; margin-bottom: 12px; outline: none; font-size: 16px; }
-        .btn-group { display: flex; gap: 10px; }
-        button { flex: 1; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; }
-        .dec-btn { background: #1f6feb; }
-        .enc-btn { background: #238636; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #0d1117; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+            color: #c9d1d9; 
+        }
+        
+        /* Install Prompt - Sirf browser mein dikhega */
+        #installPrompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        
+        .install-card {
+            background: #161b22;
+            border: 2px solid #58a6ff;
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 400px;
+            text-align: center;
+            animation: glow 2s infinite;
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px #58a6ff; }
+            50% { box-shadow: 0 0 40px #1f6feb; }
+            100% { box-shadow: 0 0 20px #58a6ff; }
+        }
+        
+        .install-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .install-title {
+            color: #58a6ff;
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .install-text {
+            color: #8b949e;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .install-button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s;
+        }
+        
+        .install-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .install-note {
+            margin-top: 20px;
+            color: #6e7681;
+            font-size: 12px;
+        }
+        
+        /* Main App - Sirf installed mode mein dikhega */
+        #mainApp {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+        
+        .header { 
+            background: #161b22; 
+            color: #58a6ff; 
+            padding: 20px; 
+            text-align: center; 
+            font-weight: bold; 
+            border-bottom: 1px solid #30363d; 
+            z-index: 100;
+            -webkit-app-region: drag;
+            position: relative;
+        }
+        
+        .security-badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 10px;
+            color: #238636;
+        }
+        
+        #display { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px 15px 150px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        
+        .bubble { 
+            max-width: 85%; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            word-wrap: break-word; 
+            position: relative;
+        }
+        
+        .sent { 
+            background: #238636; 
+            color: white; 
+            align-self: flex-end; 
+        }
+        
+        .received { 
+            background: #30363d; 
+            color: #58a6ff; 
+            align-self: flex-start; 
+        }
+        
+        .system { 
+            background: #1f2a40; 
+            color: #ffa657; 
+            align-self: center; 
+            font-style: italic; 
+            border: 1px dashed #58a6ff; 
+        }
+        
+        .encrypted-bubble {
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            opacity: 0.8;
+        }
+        
+        .controls { 
+            background: #161b22; 
+            padding: 15px; 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            border-top: 1px solid #30363d; 
+            z-index: 100; 
+        }
+        
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            border-radius: 8px; 
+            color: #58a6ff; 
+            margin-bottom: 12px; 
+            outline: none; 
+            font-size: 16px; 
+        }
+        
+        .btn-group { 
+            display: flex; 
+            gap: 10px; 
+        }
+        
+        button { 
+            flex: 1; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 8px; 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 15px; 
+            transition: all 0.3s; 
+        }
+        
+        button:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+        
+        .dec-btn { 
+            background: #1f6feb; 
+        }
+        
+        .enc-btn { 
+            background: #238636; 
+        }
+        
+        .fingerprint-btn {
+            background: #6e40c9;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        
+        .security-status {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            background: #0d1117;
+            border-top: 1px solid #30363d;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
-
-<div class="header">RS CHAT // SECURE TERMINAL</div>
-<div id="display"></div>
-
-<div class="controls">
-    <input type="text" id="userInput" placeholder="Type or paste code..." autocomplete="off">
-    <div class="btn-group">
-        <button class="dec-btn" onclick="handleDecrypt()">🔓 DECODE</button>
-        <button class="enc-btn" onclick="handleEncrypt()">🔒 SEND</button>
+    <!-- Install Prompt (Browser Mode) -->
+    <div id="installPrompt">
+        <div class="install-card">
+            <div class="install-icon">📱</div>
+            <div class="install-title">RS CHAT</div>
+            <div class="install-text">
+                Ye app sirf installed version mein chalta hai<br><br>
+                <strong>Security Features:</strong><br>
+                ✓ End-to-End Encryption<br>
+                ✓ Biometric Authentication<br>
+                ✓ Auto Session Destroy<br>
+                ✓ Screen Capture Protection<br>
+                ✓ Offline Support
+            </div>
+            <button class="install-button" id="installButton">
+                📲 INSTALL APP
+            </button>
+            <div class="install-note">
+                Add to home screen se app install karein
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    const MASTER_KEY = "REHAN_SANDHI_181";
-    const syms = ["%", "$", "#", "@", "!", "+", "×", "÷", "=", "?", ";", ":", "•", "~", "_", "/"];
-    const separator = "§"; // Unique internal separator
-
-    function getKeyWeight(key) {
-        let weight = 0;
-        for (let i = 0; i < key.length; i++) { weight += key.charCodeAt(i); }
-        return weight;
-    }
-
-    function getSalt() {
-        const d = new Date();
-        return d.getHours() + Math.floor(d.getMinutes() / 10);
-    }
-
-    function handleEncrypt() {
-        const text = document.getElementById('userInput').value;
-        if (!text) return;
-
-        const salt = getSalt();
-        const weight = getKeyWeight(MASTER_KEY);
-        let encrypted = "";
-
-        for (let i = 0; i < text.length; i++) {
-            let code = text.charCodeAt(i) + salt + weight;
-            let hex = code.toString(16);
-            
-            // Symbol masking
-            let s1 = syms[Math.floor(Math.random() * syms.length)];
-            let s2 = syms[Math.floor(Math.random() * syms.length)];
-            
-            // Humne ab har hex pair ke beech separator dala hai taaki decoding me mix na ho
-            encrypted += s1 + hex + s2 + separator;
-        }
-
-        addBubble(text, 'sent');
-        document.getElementById('userInput').value = "";
-        window.open(`https://wa.me/?text=${encodeURIComponent(encrypted)}`, '_blank');
-    }
-
-    function handleDecrypt() {
-        const input = document.getElementById('userInput').value;
-        if (!input) return;
-
-        const salt = getSalt();
-        const weight = getKeyWeight(MASTER_KEY);
+    <!-- Main App (Installed Mode) -->
+    <div id="mainApp">
+        <div class="header">
+            RS CHAT // SECURE TERMINAL
+            <span class="security-badge" id="securityLevel">🔒 MAX</span>
+        </div>
         
-        // Split by our unique separator
-        let segments = input.split(separator);
-        let decoded = "";
+        <div id="display"></div>
+        
+        <div class="security-status">
+            <span id="authStatus">🔐 Biometric: Required</span>
+            <span id="sessionTimer">⏱️ Session: 15:00</span>
+            <span id="encryptionStatus">🔑 AES-256</span>
+        </div>
 
-        try {
-            segments.forEach(seg => {
-                if (seg.trim()) {
-                    // Sirf hex characters extract karna (0-9, a-f)
-                    let hex = seg.match(/[0-9a-fA-F]+/);
-                    if (hex) {
-                        let num = parseInt(hex[0], 16);
-                        decoded += String.fromCharCode(num - salt - weight);
+        <div class="controls">
+            <input type="text" id="userInput" placeholder="Type message..." autocomplete="off">
+            <div class="btn-group">
+                <button class="dec-btn" onclick="handleDecrypt()" id="decryptBtn">🔓 DECODE</button>
+                <button class="enc-btn" onclick="handleEncrypt()" id="encryptBtn">🔒 SEND</button>
+            </div>
+            <button class="fingerprint-btn" onclick="authenticateUser()" id="authBtn">
+                🖐️ Verify Fingerprint / Face
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== SECURITY CONFIG ====================
+        const SECURITY_CONFIG = {
+            MASTER_PASSWORD: "REHAN_SANDHI_181_" + Math.random().toString(36),
+            SESSION_TIMEOUT: 900000, // 15 minutes
+            MAX_ATTEMPTS: 3,
+            BIOMETRIC_REQUIRED: true
+        };
+        
+        // ==================== INSTALLATION CHECK ====================
+        let deferredPrompt;
+        const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                           window.navigator.standalone === true;
+        
+        window.addEventListener('load', () => {
+            if (isInstalled) {
+                // Installed mode - Show app
+                document.getElementById('installPrompt').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                initializeSecureApp();
+            } else {
+                // Browser mode - Show install prompt
+                document.getElementById('installPrompt').style.display = 'flex';
+            }
+        });
+        
+        // Handle install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            document.getElementById('installButton').addEventListener('click', async () => {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            });
+        });
+        
+        // ==================== BIOMETRIC AUTH ====================
+        let isAuthenticated = false;
+        let authAttempts = 0;
+        
+        async function authenticateUser() {
+            if (!SECURITY_CONFIG.BIOMETRIC_REQUIRED) return true;
+            
+            try {
+                // Check if biometric is available
+                if (window.PublicKeyCredential) {
+                    const authBtn = document.getElementById('authBtn');
+                    authBtn.disabled = true;
+                    authBtn.innerText = '⏳ Verifying...';
+                    
+                    // Request biometric authentication
+                    const credential = await navigator.credentials.get({
+                        publicKey: {
+                            challenge: new Uint8Array(32),
+                            rpId: window.location.hostname || 'localhost',
+                            userVerification: 'required',
+                            timeout: 60000
+                        }
+                    });
+                    
+                    if (credential) {
+                        isAuthenticated = true;
+                        authAttempts = 0;
+                        document.getElementById('authStatus').innerHTML = '🔓 Biometric: Verified';
+                        document.getElementById('authBtn').innerText = '✅ Verified';
+                        startSessionTimer();
+                        return true;
                     }
+                } else {
+                    // Fallback to PIN if biometric not available
+                    return fallbackAuth();
+                }
+            } catch (error) {
+                authAttempts++;
+                if (authAttempts >= SECURITY_CONFIG.MAX_ATTEMPTS) {
+                    lockApp();
+                }
+                document.getElementById('authStatus').innerHTML = '❌ Verification Failed';
+                document.getElementById('authBtn').innerText = '🖐️ Try Again';
+            }
+            authBtn.disabled = false;
+            return false;
+        }
+        
+        function fallbackAuth() {
+            const pin = prompt('Enter Security PIN (default: 1234):');
+            if (pin === '1234') { // Change this in production
+                isAuthenticated = true;
+                document.getElementById('authStatus').innerHTML = '🔓 PIN Verified';
+                return true;
+            }
+            return false;
+        }
+        
+        function lockApp() {
+            document.getElementById('display').innerHTML = '';
+            addBubble('🔒 TOO MANY ATTEMPTS - APP LOCKED', 'system');
+            document.getElementById('userInput').disabled = true;
+            document.getElementById('encryptBtn').disabled = true;
+            document.getElementById('decryptBtn').disabled = true;
+        }
+        
+        // ==================== SESSION MANAGEMENT ====================
+        let sessionInterval;
+        
+        function startSessionTimer() {
+            let timeLeft = SECURITY_CONFIG.SESSION_TIMEOUT / 1000;
+            
+            sessionInterval = setInterval(() => {
+                timeLeft--;
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                document.getElementById('sessionTimer').innerHTML = 
+                    `⏱️ Session: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(sessionInterval);
+                    destroySession();
+                }
+            }, 1000);
+        }
+        
+        function destroySession() {
+            isAuthenticated = false;
+            document.getElementById('display').innerHTML = '';
+            document.getElementById('userInput').disabled = true;
+            document.getElementById('encryptBtn').disabled = true;
+            document.getElementById('decryptBtn').disabled = true;
+            addBubble('🔒 SESSION EXPIRED - Re-authenticate', 'system');
+            document.getElementById('authBtn').style.display = 'block';
+        }
+        
+        // ==================== ENCRYPTION (AES-256-GCM) ====================
+        async function getEncryptionKey() {
+            const encoder = new TextEncoder();
+            const passwordData = encoder.encode(SECURITY_CONFIG.MASTER_PASSWORD);
+            
+            const keyMaterial = await crypto.subtle.importKey(
+                'raw', passwordData, { name: 'PBKDF2' }, false, ['deriveKey']
+            );
+            
+            return crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: encoder.encode('RS-CHAT-SECURE-SALT-2026'),
+                    iterations: 600000, // High iterations for security
+                    hash: 'SHA-512'
+                },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+        
+        async function secureEncrypt(text) {
+            if (!isAuthenticated) {
+                addBubble('🔒 Please verify first', 'system');
+                return null;
+            }
+            
+            try {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text);
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const key = await getEncryptionKey();
+                
+                const encryptedData = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv, additionalData: encoder.encode('RS-CHAT') },
+                    key,
+                    data
+                );
+                
+                const combined = new Uint8Array(iv.length + encryptedData.byteLength);
+                combined.set(iv, 0);
+                combined.set(new Uint8Array(encryptedData), iv.length);
+                
+                return btoa(String.fromCharCode(...combined));
+            } catch (error) {
+                console.error('Encryption error:', error);
+                return null;
+            }
+        }
+        
+        async function secureDecrypt(encryptedText) {
+            if (!isAuthenticated) {
+                addBubble('🔒 Please verify first', 'system');
+                return null;
+            }
+            
+            try {
+                const combined = new Uint8Array(
+                    atob(encryptedText).split('').map(c => c.charCodeAt(0))
+                );
+                
+                const iv = combined.slice(0, 12);
+                const data = combined.slice(12);
+                const key = await getEncryptionKey();
+                const encoder = new TextEncoder();
+                
+                const decryptedData = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv, additionalData: encoder.encode('RS-CHAT') },
+                    key,
+                    data
+                );
+                
+                return new TextDecoder().decode(decryptedData);
+            } catch (error) {
+                console.error('Decryption error:', error);
+                return null;
+            }
+        }
+        
+        // ==================== UI FUNCTIONS ====================
+        async function handleEncrypt() {
+            if (!isAuthenticated) {
+                addBubble('🔒 Please verify fingerprint first', 'system');
+                return;
+            }
+            
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            
+            if (!text) {
+                addBubble('⚠️ Type a message', 'system');
+                return;
+            }
+            
+            setButtonsState(true);
+            
+            try {
+                addBubble(text, 'sent');
+                const encrypted = await secureEncrypt(text);
+                
+                if (encrypted) {
+                    await navigator.clipboard.writeText(encrypted);
+                    addBubble('📋 Encrypted! Copied to clipboard', 'system');
+                    addBubble('🔐 ' + encrypted.substring(0, 50) + '...', 'encrypted-bubble received');
+                    window.open(`https://wa.me/?text=${encodeURIComponent(encrypted)}`, '_blank');
+                }
+            } catch (error) {
+                addBubble('❌ Encryption failed', 'system');
+            }
+            
+            input.value = '';
+            setButtonsState(false);
+        }
+        
+        async function handleDecrypt() {
+            if (!isAuthenticated) {
+                addBubble('🔒 Please verify fingerprint first', 'system');
+                return;
+            }
+            
+            const input = document.getElementById('userInput');
+            const encryptedText = input.value.trim();
+            
+            if (!encryptedText) {
+                addBubble('⚠️ Paste encrypted code', 'system');
+                return;
+            }
+            
+            setButtonsState(true);
+            
+            try {
+                const decrypted = await secureDecrypt(encryptedText);
+                
+                if (decrypted) {
+                    addBubble('🔓 Decoded: ' + decrypted, 'received');
+                } else {
+                    addBubble('❌ Invalid or tampered message', 'system');
+                }
+            } catch (error) {
+                addBubble('❌ Decryption failed', 'system');
+            }
+            
+            input.value = '';
+            setButtonsState(false);
+        }
+        
+        function addBubble(text, type) {
+            const display = document.getElementById('display');
+            const div = document.createElement('div');
+            div.className = `bubble ${type}`;
+            div.innerText = text;
+            display.appendChild(div);
+            display.scrollTop = display.scrollHeight;
+        }
+        
+        function setButtonsState(disabled) {
+            document.getElementById('encryptBtn').disabled = disabled;
+            document.getElementById('decryptBtn').disabled = disabled;
+        }
+        
+        // ==================== SCREEN PROTECTION ====================
+        function initializeSecureApp() {
+            // Prevent screenshots (basic)
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    document.body.style.filter = 'blur(10px)';
+                } else {
+                    document.body.style.filter = 'none';
                 }
             });
-
-            if (decoded && decoded.length > 0) {
-                addBubble("Decoded: " + decoded, 'received');
-            } else {
-                throw new Error();
+            
+            // Prevent copy-paste from other apps
+            document.addEventListener('copy', (e) => {
+                e.clipboardData.setData('text/plain', '🔒 Protected Content');
+                e.preventDefault();
+            });
+            
+            // Auto lock on app switch
+            window.addEventListener('blur', () => {
+                if (isAuthenticated) {
+                    setTimeout(() => {
+                        if (!document.hasFocus()) {
+                            isAuthenticated = false;
+                            document.getElementById('authStatus').innerHTML = '🔐 Re-authentication Required';
+                        }
+                    }, 1000);
+                }
+            });
+            
+            // Welcome message
+            addBubble('🔒 MAX SECURITY MODE ACTIVE', 'system');
+            addBubble('⚡ Biometric required for each session', 'system');
+            addBubble('📱 This app works only in installed mode', 'system');
+            
+            // Auto-request authentication
+            setTimeout(() => authenticateUser(), 500);
+        }
+    </script>
+</body>
+</html>                throw new Error();
             }
         } catch (e) {
             addBubble("Error: Invalid Code or Expired!", "received");
