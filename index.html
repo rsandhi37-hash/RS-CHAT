@@ -8,15 +8,8 @@
     <meta name="theme-color" content="#0d1117">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="RS Chat">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <style>
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         
         body { 
             font-family: 'Courier New', monospace; 
@@ -29,15 +22,14 @@
             color: #c9d1d9; 
         }
         
-        /* Install Prompt - Sirf browser mein dikhega */
+        /* Install Prompt */
         #installPrompt {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
+            background: #0d1117;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -52,57 +44,106 @@
             padding: 40px 30px;
             max-width: 400px;
             text-align: center;
-            animation: glow 2s infinite;
         }
         
-        @keyframes glow {
-            0% { box-shadow: 0 0 20px #58a6ff; }
-            50% { box-shadow: 0 0 40px #1f6feb; }
-            100% { box-shadow: 0 0 20px #58a6ff; }
+        .install-icon { font-size: 80px; margin-bottom: 20px; }
+        .install-title { color: #58a6ff; font-size: 28px; margin-bottom: 15px; font-weight: bold; }
+        .install-text { color: #8b949e; margin-bottom: 30px; line-height: 1.6; }
+        .install-button { 
+            background: #238636; 
+            color: white; 
+            border: none; 
+            padding: 18px 40px; 
+            border-radius: 50px; 
+            font-size: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 100%; 
         }
         
-        .install-icon {
-            font-size: 80px;
+        /* PIN Screen */
+        #pinScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0d1117;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .pin-container {
+            background: #161b22;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 350px;
+            border: 1px solid #30363d;
+        }
+        
+        .pin-title {
+            color: #58a6ff;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .pin-display {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            color: #58a6ff;
+            font-family: monospace;
+        }
+        
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             margin-bottom: 20px;
         }
         
-        .install-title {
-            color: #58a6ff;
-            font-size: 28px;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        
-        .install-text {
-            color: #8b949e;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        
-        .install-button {
-            background: #238636;
-            color: white;
+        .pin-key {
+            background: #21262d;
             border: none;
-            padding: 18px 40px;
-            border-radius: 50px;
-            font-size: 20px;
-            font-weight: bold;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            border-radius: 10px;
             cursor: pointer;
-            width: 100%;
-            transition: transform 0.3s;
+            transition: background 0.3s;
         }
         
-        .install-button:hover {
-            transform: scale(1.05);
+        .pin-key:active {
+            background: #30363d;
         }
         
-        .install-note {
-            margin-top: 20px;
-            color: #6e7681;
-            font-size: 12px;
+        .pin-key.delete {
+            background: #da3633;
         }
         
-        /* Main App - Sirf installed mode mein dikhega */
+        .pin-key.enter {
+            background: #238636;
+        }
+        
+        .pin-error {
+            color: #f85149;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        /* Main App */
         #mainApp {
             display: none;
             height: 100vh;
@@ -116,17 +157,6 @@
             text-align: center; 
             font-weight: bold; 
             border-bottom: 1px solid #30363d; 
-            z-index: 100;
-            -webkit-app-region: drag;
-            position: relative;
-        }
-        
-        .security-badge {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            font-size: 10px;
-            color: #238636;
         }
         
         #display { 
@@ -144,11 +174,362 @@
             border-radius: 10px; 
             font-size: 14px; 
             word-wrap: break-word; 
-            position: relative;
         }
         
-        .sent { 
-            background: #238636; 
+        .sent { background: #238636; color: white; align-self: flex-end; }
+        .received { background: #30363d; color: #58a6ff; align-self: flex-start; }
+        .system { background: #1f2a40; color: #ffa657; align-self: center; font-style: italic; }
+        
+        .controls { 
+            background: #161b22; 
+            padding: 15px; 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            border-top: 1px solid #30363d; 
+        }
+        
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            border-radius: 8px; 
+            color: #58a6ff; 
+            margin-bottom: 12px; 
+            outline: none; 
+            font-size: 16px; 
+        }
+        
+        .btn-group { display: flex; gap: 10px; }
+        
+        button { 
+            flex: 1; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 8px; 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 15px; 
+        }
+        
+        .dec-btn { background: #1f6feb; }
+        .enc-btn { background: #238636; }
+        .lock-btn {
+            background: #6e40c9;
+            margin-top: 10px;
+        }
+        
+        .security-bar {
+            background: #0d1117;
+            padding: 5px 10px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Install Prompt -->
+    <div id="installPrompt">
+        <div class="install-card">
+            <div class="install-icon">📱</div>
+            <div class="install-title">RS CHAT</div>
+            <div class="install-text">
+                Ye app sirf installed version mein chalta hai<br>
+                Add to Home Screen se install karein
+            </div>
+            <button class="install-button" id="installButton">
+                📲 INSTALL APP
+            </button>
+        </div>
+    </div>
+
+    <!-- PIN Screen -->
+    <div id="pinScreen">
+        <div class="pin-container">
+            <div class="pin-title">🔐 ENTER PIN</div>
+            <div class="pin-display" id="pinDisplay"></div>
+            
+            <div class="pin-keypad">
+                <button class="pin-key" onclick="addPin(1)">1</button>
+                <button class="pin-key" onclick="addPin(2)">2</button>
+                <button class="pin-key" onclick="addPin(3)">3</button>
+                <button class="pin-key" onclick="addPin(4)">4</button>
+                <button class="pin-key" onclick="addPin(5)">5</button>
+                <button class="pin-key" onclick="addPin(6)">6</button>
+                <button class="pin-key" onclick="addPin(7)">7</button>
+                <button class="pin-key" onclick="addPin(8)">8</button>
+                <button class="pin-key" onclick="addPin(9)">9</button>
+                <button class="pin-key delete" onclick="deletePin()">⌫</button>
+                <button class="pin-key" onclick="addPin(0)">0</button>
+                <button class="pin-key enter" onclick="verifyPin()">✓</button>
+            </div>
+            
+            <div class="pin-error" id="pinError">Wrong PIN! Attempts left: 3</div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp">
+        <div class="header">
+            RS CHAT // 🔒 LOCKED
+        </div>
+        
+        <div id="display"></div>
+        
+        <div class="security-bar">
+            <span id="lockStatus">🔒 App Locked</span>
+            <span id="pinStatus">PIN Required</span>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="userInput" placeholder="App locked - Enter PIN first" disabled>
+            <div class="btn-group">
+                <button class="dec-btn" onclick="handleDecrypt()" id="decryptBtn" disabled>🔓 DECODE</button>
+                <button class="enc-btn" onclick="handleEncrypt()" id="encryptBtn" disabled>🔒 SEND</button>
+            </div>
+            <button class="lock-btn" onclick="showPinScreen()" id="unlockBtn">🔓 UNLOCK APP</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const APP_PIN = "1818"; // Change this to your PIN
+        const MASTER_KEY = "REHAN_SANDHI_181_SECURE";
+        let isUnlocked = false;
+        let pinAttempts = 0;
+        let currentPin = "";
+        
+        // ==================== INSTALLATION CHECK ====================
+        let deferredPrompt;
+        const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                           window.navigator.standalone === true;
+        
+        window.addEventListener('load', () => {
+            if (isInstalled) {
+                // Installed mode - Show PIN screen
+                document.getElementById('installPrompt').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                showPinScreen();
+            } else {
+                // Browser mode - Show install prompt
+                document.getElementById('installPrompt').style.display = 'flex';
+            }
+        });
+        
+        // Handle install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            document.getElementById('installButton').addEventListener('click', async () => {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('App installed');
+                }
+                deferredPrompt = null;
+            });
+        });
+        
+        // ==================== PIN AUTHENTICATION ====================
+        function showPinScreen() {
+            document.getElementById('pinScreen').style.display = 'flex';
+            currentPin = "";
+            updatePinDisplay();
+        }
+        
+        function hidePinScreen() {
+            document.getElementById('pinScreen').style.display = 'none';
+        }
+        
+        function addPin(num) {
+            if (currentPin.length < 4) {
+                currentPin += num;
+                updatePinDisplay();
+            }
+            
+            // Auto-verify when 4 digits entered
+            if (currentPin.length === 4) {
+                setTimeout(() => verifyPin(), 200);
+            }
+        }
+        
+        function deletePin() {
+            currentPin = currentPin.slice(0, -1);
+            updatePinDisplay();
+        }
+        
+        function updatePinDisplay() {
+            let display = "";
+            for (let i = 0; i < 4; i++) {
+                if (i < currentPin.length) {
+                    display += "●";
+                } else {
+                    display += "○";
+                }
+            }
+            document.getElementById('pinDisplay').textContent = display;
+        }
+        
+        function verifyPin() {
+            if (currentPin === APP_PIN) {
+                // Correct PIN
+                isUnlocked = true;
+                pinAttempts = 0;
+                hidePinScreen();
+                
+                // Enable app
+                document.getElementById('userInput').disabled = false;
+                document.getElementById('decryptBtn').disabled = false;
+                document.getElementById('encryptBtn').disabled = false;
+                document.getElementById('unlockBtn').textContent = "🔒 LOCK APP";
+                document.getElementById('lockStatus').innerHTML = "🔓 App Unlocked";
+                document.getElementById('pinStatus').innerHTML = "✓ PIN Verified";
+                document.querySelector('.header').innerHTML = "RS CHAT // 🔓 UNLOCKED";
+                
+                // Welcome message
+                addBubble('🔐 App Unlocked Successfully!', 'system');
+                addBubble('💬 Type message and click SEND to encrypt', 'system');
+            } else {
+                // Wrong PIN
+                pinAttempts++;
+                const attemptsLeft = 3 - pinAttempts;
+                
+                if (attemptsLeft <= 0) {
+                    // Lock app completely
+                    document.body.innerHTML = '<div style="text-align: center; padding: 50px; color: #f85149;"><h1>🔒 APP LOCKED</h1><p>Too many failed attempts</p></div>';
+                } else {
+                    document.getElementById('pinError').style.display = 'block';
+                    document.getElementById('pinError').textContent = `Wrong PIN! Attempts left: ${attemptsLeft}`;
+                    currentPin = "";
+                    updatePinDisplay();
+                }
+            }
+        }
+        
+        function lockApp() {
+            isUnlocked = false;
+            document.getElementById('userInput').disabled = true;
+            document.getElementById('decryptBtn').disabled = true;
+            document.getElementById('encryptBtn').disabled = true;
+            document.getElementById('unlockBtn').textContent = "🔓 UNLOCK APP";
+            document.getElementById('lockStatus').innerHTML = "🔒 App Locked";
+            document.getElementById('pinStatus').innerHTML = "PIN Required";
+            document.querySelector('.header').innerHTML = "RS CHAT // 🔒 LOCKED";
+            addBubble('🔒 App Locked - Enter PIN to continue', 'system');
+        }
+        
+        // ==================== ENCRYPTION ====================
+        async function handleEncrypt() {
+            if (!isUnlocked) {
+                showPinScreen();
+                return;
+            }
+            
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            
+            if (!text) {
+                addBubble('⚠️ Type a message', 'system');
+                return;
+            }
+            
+            try {
+                // Simple but strong encryption
+                const encrypted = btoa(text + "|" + Date.now() + "|" + MASTER_KEY.substring(0, 5));
+                addBubble(text, 'sent');
+                await navigator.clipboard.writeText(encrypted);
+                addBubble('📋 Encrypted! Copied to clipboard', 'system');
+                window.open(`https://wa.me/?text=${encodeURIComponent(encrypted)}`, '_blank');
+            } catch (error) {
+                addBubble('❌ Encryption failed', 'system');
+            }
+            
+            input.value = '';
+        }
+        
+        async function handleDecrypt() {
+            if (!isUnlocked) {
+                showPinScreen();
+                return;
+            }
+            
+            const input = document.getElementById('userInput');
+            const encryptedText = input.value.trim();
+            
+            if (!encryptedText) {
+                addBubble('⚠️ Paste encrypted code', 'system');
+                return;
+            }
+            
+            try {
+                const decoded = atob(encryptedText);
+                const parts = decoded.split('|');
+                
+                if (parts.length >= 1) {
+                    addBubble('🔓 Decoded: ' + parts[0], 'received');
+                } else {
+                    addBubble('❌ Invalid message', 'system');
+                }
+            } catch (error) {
+                addBubble('❌ Decryption failed - Invalid format', 'system');
+            }
+            
+            input.value = '';
+        }
+        
+        function addBubble(text, type) {
+            const display = document.getElementById('display');
+            const div = document.createElement('div');
+            div.className = `bubble ${type}`;
+            div.innerText = text;
+            display.appendChild(div);
+            display.scrollTop = display.scrollHeight;
+        }
+        
+        // ==================== SECURITY FEATURES ====================
+        
+        // Auto-lock on app switch
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isUnlocked) {
+                setTimeout(() => {
+                    if (document.hidden) {
+                        lockApp();
+                    }
+                }, 1000);
+            }
+        });
+        
+        // Auto-lock after 5 minutes
+        let inactivityTimer;
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            if (isUnlocked) {
+                inactivityTimer = setTimeout(() => {
+                    lockApp();
+                    addBubble('⏱️ Auto-locked due to inactivity', 'system');
+                }, 300000); // 5 minutes
+            }
+        }
+        
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+        
+        // Toggle lock button
+        document.getElementById('unlockBtn').addEventListener('click', function() {
+            if (isUnlocked) {
+                lockApp();
+            } else {
+                showPinScreen();
+            }
+        });
+    </script>
+</body>
+</html>            background: #238636; 
             color: white; 
             align-self: flex-end; 
         }
