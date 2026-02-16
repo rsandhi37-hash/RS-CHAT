@@ -2,113 +2,509 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS Chat - Secure Messenger</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d1117">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RS Chat</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            background: #0d1117;
-            color: #c9d1d9;
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
         
-        /* Welcome Screen for First Time Users */
-        #welcomeScreen {
+        /* Install Prompt */
+        #installPrompt {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: #0d1117;
+            background: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 15000;
             padding: 20px;
+            z-index: 1000;
         }
         
-        .welcome-card {
-            background: #161b22;
-            border: 2px solid #58a6ff;
-            border-radius: 30px;
-            padding: 40px 25px;
-            max-width: 450px;
-            width: 100%;
+        .install-card {
+            background: #1a1a1a;
+            padding: 40px 30px;
+            border-radius: 20px;
             text-align: center;
-            animation: glow 2s infinite;
+            max-width: 350px;
+            border: 2px solid #00ff88;
         }
         
-        @keyframes glow {
-            0% { box-shadow: 0 0 30px #58a6ff; }
-            50% { box-shadow: 0 0 60px #1f6feb; }
-            100% { box-shadow: 0 0 30px #58a6ff; }
-        }
-        
-        .app-icon {
-            font-size: 100px;
+        .install-icon {
+            font-size: 80px;
             margin-bottom: 20px;
-            background: #0d1117;
-            width: 120px;
-            height: 120px;
-            line-height: 120px;
-            border-radius: 30px;
-            margin: 0 auto 30px;
-            border: 3px solid #58a6ff;
         }
         
-        .welcome-title {
-            color: #58a6ff;
-            font-size: 32px;
-            margin-bottom: 15px;
+        .install-title {
+            font-size: 28px;
+            color: #00ff88;
+            margin-bottom: 20px;
             font-weight: bold;
         }
         
-        .welcome-text {
-            color: #8b949e;
+        .install-text {
+            color: #888;
             margin-bottom: 30px;
-            line-height: 1.8;
-            font-size: 16px;
+            line-height: 1.6;
         }
         
-        .features {
-            text-align: left;
-            background: #0d1117;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .feature-item {
-            margin: 15px 0;
-            color: #c9d1d9;
-        }
-        
-        .feature-item span {
-            color: #58a6ff;
-            margin-right: 10px;
-        }
-        
-        .get-started-btn {
-            background: #238636;
-            color: white;
+        .install-button {
+            background: #00ff88;
+            color: black;
             border: none;
-            padding: 20px;
-            border-radius: 50px;
-            font-size: 22px;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .browser-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        /* PIN Screen */
+        #pinScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0a0a0a;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 900;
+        }
+        
+        .pin-card {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 320px;
+            width: 100%;
+        }
+        
+        .pin-title {
+            text-align: center;
+            color: #00ff88;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        
+        .pin-display {
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-size: 30px;
+            letter-spacing: 10px;
+            margin-bottom: 20px;
+            color: #00ff88;
+        }
+        
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .pin-key {
+            background: #333;
+            border: none;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .pin-key:active {
+            background: #444;
+        }
+        
+        .pin-key.delete {
+            background: #d32f2f;
+        }
+        
+        .pin-key.enter {
+            background: #00ff88;
+            color: black;
+        }
+        
+        /* Main Chat */
+        #mainApp {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #1a1a1a;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            color: #00ff88;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        #chatArea {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .message {
+            background: #1a1a1a;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin: 10px 0;
+            max-width: 80%;
+        }
+        
+        .sent {
+            background: #00ff88;
+            color: black;
+            margin-left: auto;
+        }
+        
+        .received {
+            background: #333;
+            color: white;
+            margin-right: auto;
+        }
+        
+        .info {
+            background: #1a1a1a;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .input-area {
+            background: #1a1a1a;
+            padding: 20px;
+            border-top: 2px solid #333;
+        }
+        
+        #messageInput {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .button-group button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .send-btn {
+            background: #00ff88;
+            color: black;
+        }
+        
+        .decode-btn {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .lock-status {
+            text-align: center;
+            margin-top: 10px;
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Install Prompt -->
+    <div id="installPrompt">
+        <div class="install-card">
+            <div class="install-icon">📱</div>
+            <div class="install-title">RS CHAT</div>
+            <div class="install-text">
+                Install app for better experience:<br>
+                • Secure Login<br>
+                • Fast Access<br>
+                • Offline Support
+            </div>
+            <button class="install-button" id="installBtn">📲 INSTALL APP</button>
+            <button class="browser-btn" onclick="useInBrowser()">🌐 Continue in Browser</button>
+        </div>
+    </div>
+    
+    <!-- PIN Screen -->
+    <div id="pinScreen">
+        <div class="pin-card">
+            <div class="pin-title">🔐 ENTER PIN</div>
+            <div class="pin-display" id="pinDisplay"></div>
+            
+            <div class="pin-keypad">
+                <button class="pin-key" onclick="addPin(1)">1</button>
+                <button class="pin-key" onclick="addPin(2)">2</button>
+                <button class="pin-key" onclick="addPin(3)">3</button>
+                <button class="pin-key" onclick="addPin(4)">4</button>
+                <button class="pin-key" onclick="addPin(5)">5</button>
+                <button class="pin-key" onclick="addPin(6)">6</button>
+                <button class="pin-key" onclick="addPin(7)">7</button>
+                <button class="pin-key" onclick="addPin(8)">8</button>
+                <button class="pin-key" onclick="addPin(9)">9</button>
+                <button class="pin-key delete" onclick="deletePin()">⌫</button>
+                <button class="pin-key" onclick="addPin(0)">0</button>
+                <button class="pin-key enter" onclick="verifyPin()">✓</button>
+            </div>
+            <div class="lock-status" id="pinError"></div>
+        </div>
+    </div>
+    
+    <!-- Main Chat App -->
+    <div id="mainApp">
+        <div class="header">
+            RS CHAT 🔒
+        </div>
+        
+        <div id="chatArea">
+            <div class="info">👋 Welcome! Enter PIN 1818 to start</div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type message..." disabled>
+            <div class="button-group">
+                <button class="send-btn" id="sendBtn" disabled onclick="sendMessage()">SEND</button>
+                <button class="decode-btn" id="decodeBtn" disabled onclick="decodeMessage()">DECODE</button>
+            </div>
+            <div class="lock-status" id="lockStatus">🔒 Locked</div>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== VARIABLES ====================
+        const CORRECT_PIN = "1818";
+        let currentPin = "";
+        let attempts = 0;
+        let isUnlocked = false;
+        let deferredPrompt;
+        
+        // ==================== INSTALL CHECK ====================
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                            window.navigator.standalone === true;
+        
+        window.addEventListener('load', () => {
+            if (isStandalone) {
+                // App installed - show PIN
+                document.getElementById('installPrompt').style.display = 'none';
+                document.getElementById('pinScreen').style.display = 'flex';
+            } else {
+                // Not installed - show install prompt
+                document.getElementById('installPrompt').style.display = 'flex';
+            }
+        });
+        
+        // ==================== INSTALL BUTTON ====================
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            document.getElementById('installBtn').onclick = async () => {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('installPrompt').style.display = 'none';
+                }
+                deferredPrompt = null;
+            };
+        });
+        
+        // ==================== BROWSER MODE ====================
+        function useInBrowser() {
+            document.getElementById('installPrompt').style.display = 'none';
+            document.getElementById('pinScreen').style.display = 'flex';
+        }
+        
+        // ==================== PIN FUNCTIONS ====================
+        function addPin(num) {
+            if (currentPin.length < 4) {
+                currentPin += num;
+                updatePinDisplay();
+                
+                if (currentPin.length === 4) {
+                    setTimeout(verifyPin, 300);
+                }
+            }
+        }
+        
+        function deletePin() {
+            currentPin = currentPin.slice(0, -1);
+            updatePinDisplay();
+        }
+        
+        function updatePinDisplay() {
+            let display = "";
+            for (let i = 0; i < 4; i++) {
+                display += i < currentPin.length ? "●" : "○";
+            }
+            document.getElementById('pinDisplay').innerText = display;
+        }
+        
+        function verifyPin() {
+            if (currentPin === CORRECT_PIN) {
+                // Success
+                isUnlocked = true;
+                attempts = 0;
+                document.getElementById('pinScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                
+                // Enable inputs
+                document.getElementById('messageInput').disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('decodeBtn').disabled = false;
+                document.getElementById('lockStatus').innerHTML = '🔓 Unlocked';
+                
+                // Welcome message
+                addMessage('🔓 App Unlocked!', 'info');
+                addMessage('Type message and click SEND to encrypt', 'info');
+            } else {
+                // Wrong PIN
+                attempts++;
+                if (attempts >= 3) {
+                    document.body.innerHTML = '<div style="color: red; text-align: center; padding: 50px;"><h1>🔒 TOO MANY ATTEMPTS</h1><p>App Locked</p></div>';
+                } else {
+                    document.getElementById('pinError').innerText = `Wrong PIN! ${3-attempts} attempts left`;
+                    currentPin = "";
+                    updatePinDisplay();
+                }
+            }
+        }
+        
+        // ==================== CHAT FUNCTIONS ====================
+        function sendMessage() {
+            if (!isUnlocked) return;
+            
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text) {
+                addMessage('Type something!', 'info');
+                return;
+            }
+            
+            // Show sent message
+            addMessage(text, 'sent');
+            
+            // Simple encryption
+            const encrypted = btoa(text + '|' + Date.now());
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(encrypted).then(() => {
+                addMessage('📋 Encrypted code copied!', 'info');
+            });
+            
+            // Open WhatsApp
+            window.open(`https://wa.me/?text=${encodeURIComponent(encrypted)}`, '_blank');
+            
+            input.value = '';
+        }
+        
+        function decodeMessage() {
+            if (!isUnlocked) return;
+            
+            const input = document.getElementById('messageInput');
+            const code = input.value.trim();
+            
+            if (!code) {
+                addMessage('Paste encrypted code here', 'info');
+                return;
+            }
+            
+            try {
+                const decoded = atob(code);
+                const parts = decoded.split('|');
+                addMessage('🔓 ' + parts[0], 'received');
+            } catch (e) {
+                addMessage('❌ Invalid code', 'info');
+            }
+            
+            input.value = '';
+        }
+        
+        function addMessage(text, type) {
+            const chat = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerText = text;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        
+        // ==================== AUTO LOCK ====================
+        let timer;
+        function resetTimer() {
+            if (isUnlocked) {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    isUnlocked = false;
+                    document.getElementById('messageInput').disabled = true;
+                    document.getElementById('sendBtn').disabled = true;
+                    document.getElementById('decodeBtn').disabled = true;
+                    document.getElementById('lockStatus').innerHTML = '🔒 Locked';
+                    addMessage('🔒 Auto-locked', 'info');
+                    setTimeout(() => {
+                        document.getElementById('pinScreen').style.display = 'flex';
+                        document.getElementById('mainApp').style.display = 'none';
+                    }, 1000);
+                }, 300000); // 5 minutes
+            }
+        }
+        
+        document.addEventListener('click', resetTimer);
+        document.addEventListener('keypress', resetTimer);
+    </script>
+</body>
+</html>            cursor: pointer;
             width: 100%;
             transition: transform 0.3s;
         }
