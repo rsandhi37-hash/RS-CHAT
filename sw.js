@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rs-chat-v3';
+const CACHE_NAME = 'rs-chat-v4';
 const urlsToCache = [
   './',
   './index.html',
