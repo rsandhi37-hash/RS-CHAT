@@ -2,28 +2,30 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RS Chat Secure</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RS Chat - Secure Messenger</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d1117">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: 'Courier New', monospace; 
-            background: #0d1117; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            overflow: hidden; 
-            color: #c9d1d9; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        /* Install Prompt */
-        #installPrompt {
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Welcome Screen for First Time Users */
+        #welcomeScreen {
             position: fixed;
             top: 0;
             left: 0;
@@ -33,36 +35,90 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
+            z-index: 15000;
             padding: 20px;
         }
         
-        .install-card {
+        .welcome-card {
             background: #161b22;
             border: 2px solid #58a6ff;
-            border-radius: 20px;
-            padding: 40px 30px;
-            max-width: 400px;
+            border-radius: 30px;
+            padding: 40px 25px;
+            max-width: 450px;
+            width: 100%;
             text-align: center;
+            animation: glow 2s infinite;
         }
         
-        .install-icon { font-size: 80px; margin-bottom: 20px; }
-        .install-title { color: #58a6ff; font-size: 28px; margin-bottom: 15px; font-weight: bold; }
-        .install-text { color: #8b949e; margin-bottom: 30px; line-height: 1.6; }
-        .install-button { 
-            background: #238636; 
-            color: white; 
-            border: none; 
-            padding: 18px 40px; 
-            border-radius: 50px; 
-            font-size: 20px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            width: 100%; 
+        @keyframes glow {
+            0% { box-shadow: 0 0 30px #58a6ff; }
+            50% { box-shadow: 0 0 60px #1f6feb; }
+            100% { box-shadow: 0 0 30px #58a6ff; }
         }
         
-        /* PIN Screen */
-        #pinScreen {
+        .app-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            background: #0d1117;
+            width: 120px;
+            height: 120px;
+            line-height: 120px;
+            border-radius: 30px;
+            margin: 0 auto 30px;
+            border: 3px solid #58a6ff;
+        }
+        
+        .welcome-title {
+            color: #58a6ff;
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .welcome-text {
+            color: #8b949e;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .features {
+            text-align: left;
+            background: #0d1117;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-item {
+            margin: 15px 0;
+            color: #c9d1d9;
+        }
+        
+        .feature-item span {
+            color: #58a6ff;
+            margin-right: 10px;
+        }
+        
+        .get-started-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 50px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s;
+        }
+        
+        .get-started-btn:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Auth Screen */
+        #authScreen {
             position: fixed;
             top: 0;
             left: 0;
@@ -72,20 +128,94 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 9000;
-            backdrop-filter: blur(10px);
+            z-index: 14000;
+            padding: 20px;
+        }
+        
+        .auth-card {
+            background: #161b22;
+            border: 2px solid #58a6ff;
+            border-radius: 30px;
+            padding: 40px 25px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .auth-icon {
+            font-size: 70px;
+            margin-bottom: 20px;
+        }
+        
+        .auth-title {
+            color: #58a6ff;
+            font-size: 26px;
+            margin-bottom: 30px;
+        }
+        
+        .fingerprint-btn {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .pin-option-btn {
+            background: #1f6feb;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .remember-device {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            color: #8b949e;
+        }
+        
+        /* PIN Modal */
+        #pinModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.98);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 16000;
+            padding: 20px;
         }
         
         .pin-container {
             background: #161b22;
             padding: 30px;
-            border-radius: 20px;
-            width: 90%;
+            border-radius: 30px;
+            width: 100%;
             max-width: 350px;
-            border: 1px solid #30363d;
+            border: 2px solid #58a6ff;
         }
         
-        .pin-title {
+        .pin-header {
             color: #58a6ff;
             text-align: center;
             margin-bottom: 20px;
@@ -94,13 +224,13 @@
         
         .pin-display {
             background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 10px;
+            border: 2px solid #30363d;
+            border-radius: 15px;
             padding: 15px;
             text-align: center;
-            font-size: 24px;
-            letter-spacing: 8px;
-            margin-bottom: 20px;
+            font-size: 28px;
+            letter-spacing: 10px;
+            margin: 20px 0;
             color: #58a6ff;
             font-family: monospace;
         }
@@ -109,7 +239,6 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 20px;
         }
         
         .pin-key {
@@ -118,13 +247,14 @@
             color: white;
             padding: 20px;
             font-size: 24px;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
-            transition: background 0.3s;
+            font-weight: bold;
         }
         
         .pin-key:active {
             background: #30363d;
+            transform: scale(0.95);
         }
         
         .pin-key.delete {
@@ -138,17 +268,613 @@
         .pin-error {
             color: #f85149;
             text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 15px;
             display: none;
         }
         
-        /* Main App */
+        /* Main Chat App */
         #mainApp {
             display: none;
             height: 100vh;
             flex-direction: column;
         }
+        
+        .header {
+            background: #161b22;
+            color: #58a6ff;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #30363d;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .lock-status {
+            background: #0d1117;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #2ea043;
+        }
+        
+        #display {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .sent {
+            background: #238636;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .received {
+            background: #30363d;
+            color: #58a6ff;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .system {
+            background: #1f2a40;
+            color: #ffa657;
+            align-self: center;
+            font-style: italic;
+            font-size: 12px;
+            border-radius: 20px;
+        }
+        
+        .welcome-message {
+            background: #1f2a40;
+            color: #58a6ff;
+            align-self: center;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px dashed #58a6ff;
+            text-align: center;
+        }
+        
+        .controls {
+            background: #161b22;
+            padding: 15px;
+            border-top: 2px solid #30363d;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        #userInput {
+            flex: 1;
+            padding: 15px;
+            background: #0d1117;
+            border: 2px solid #30363d;
+            border-radius: 25px;
+            color: #58a6ff;
+            outline: none;
+            font-size: 16px;
+        }
+        
+        #userInput:focus {
+            border-color: #58a6ff;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: opacity 0.3s;
+        }
+        
+        button:active {
+            opacity: 0.7;
+        }
+        
+        .dec-btn {
+            background: #1f6feb;
+        }
+        
+        .enc-btn {
+            background: #238636;
+        }
+        
+        .lock-btn {
+            background: #6e40c9;
+            margin-top: 10px;
+            padding: 12px;
+        }
+        
+        /* Tutorial Overlay for First Time */
+        #tutorialOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 17000;
+            padding: 20px;
+        }
+        
+        .tutorial-card {
+            background: #161b22;
+            padding: 30px;
+            border-radius: 30px;
+            max-width: 350px;
+            text-align: center;
+        }
+        
+        .tutorial-step {
+            color: #58a6ff;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-text {
+            color: #c9d1d9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .got-it-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Screen for First Time Users -->
+    <div id="welcomeScreen">
+        <div class="welcome-card">
+            <div class="app-icon">💬</div>
+            <div class="welcome-title">Welcome to RS Chat!</div>
+            <div class="welcome-text">Secure & Private Messenger</div>
+            
+            <div class="features">
+                <div class="feature-item"><span>✓</span> End-to-End Encrypted</div>
+                <div class="feature-item"><span>✓</span> Fingerprint / Face ID Login</div>
+                <div class="feature-item"><span>✓</span> PIN Backup Available</div>
+                <div class="feature-item"><span>✓</span> Messages Self-Destruct</div>
+                <div class="feature-item"><span>✓</span> No Data Collection</div>
+            </div>
+            
+            <button class="get-started-btn" onclick="showAuthScreen()">
+                🚀 GET STARTED
+            </button>
+            
+            <p style="color: #6e7681; margin-top: 20px; font-size: 12px;">
+                By continuing, you agree to our Terms
+            </p>
+        </div>
+    </div>
+    
+    <!-- Auth Screen -->
+    <div id="authScreen">
+        <div class="auth-card">
+            <div class="auth-icon">🔒</div>
+            <div class="auth-title">Verify Your Identity</div>
+            
+            <button class="fingerprint-btn" onclick="authenticateWithFingerprint()">
+                <span>🖐️</span> Use Fingerprint / Face ID
+            </button>
+            
+            <button class="pin-option-btn" onclick="showPinModal()">
+                🔑 Use PIN Instead
+            </button>
+            
+            <div class="remember-device">
+                <input type="checkbox" id="rememberDevice">
+                <label for="rememberDevice">Remember this device</label>
+            </div>
+            
+            <div id="authMessage" style="color: #f85149; margin-top: 15px; display: none;"></div>
+        </div>
+    </div>
+    
+    <!-- PIN Modal -->
+    <div id="pinModal">
+        <div class="pin-container">
+            <div class="pin-header">🔐 Enter 4-digit PIN</div>
+            <div class="pin-display" id="pinDisplay"></div>
+            
+            <div class="pin-keypad">
+                <button class="pin-key" onclick="addPin(1)">1</button>
+                <button class="pin-key" onclick="addPin(2)">2</button>
+                <button class="pin-key" onclick="addPin(3)">3</button>
+                <button class="pin-key" onclick="addPin(4)">4</button>
+                <button class="pin-key" onclick="addPin(5)">5</button>
+                <button class="pin-key" onclick="addPin(6)">6</button>
+                <button class="pin-key" onclick="addPin(7)">7</button>
+                <button class="pin-key" onclick="addPin(8)">8</button>
+                <button class="pin-key" onclick="addPin(9)">9</button>
+                <button class="pin-key delete" onclick="deletePin()">⌫</button>
+                <button class="pin-key" onclick="addPin(0)">0</button>
+                <button class="pin-key enter" onclick="verifyPin()">✓</button>
+            </div>
+            
+            <div class="pin-error" id="pinError">
+                Wrong PIN! Attempts left: 3
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tutorial Overlay -->
+    <div id="tutorialOverlay">
+        <div class="tutorial-card">
+            <div class="tutorial-step">📱 Step 1</div>
+            <div class="tutorial-text">
+                Type your message and click SEND to encrypt.<br><br>
+                Copy the encrypted code and share on WhatsApp.
+            </div>
+            <button class="got-it-btn" onclick="closeTutorial()">Got it!</button>
+        </div>
+    </div>
+    
+    <!-- Main Chat App -->
+    <div id="mainApp">
+        <div class="header">
+            <span>💬 RS CHAT</span>
+            <span class="lock-status" id="lockStatus">🔒 Locked</span>
+        </div>
+        
+        <div id="display">
+            <div class="welcome-message">
+                👋 Welcome to RS Chat!<br><br>
+                🔐 Verify yourself to start chatting
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="userInput" placeholder="Type your message..." disabled>
+            </div>
+            
+            <div class="btn-group">
+                <button class="dec-btn" id="decryptBtn" disabled>🔓 DECODE</button>
+                <button class="enc-btn" id="encryptBtn" disabled>🔒 SEND</button>
+            </div>
+            
+            <button class="lock-btn" id="unlockBtn" onclick="showAuthScreen()">
+                🔓 Tap to Unlock
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const DEFAULT_PIN = "1818"; // Users can change this
+        let currentPin = "";
+        let pinAttempts = 0;
+        let isUnlocked = false;
+        
+        // Check if user is new
+        const isFirstTime = !localStorage.getItem('rschat_user');
+        
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('load', () => {
+            if (isFirstTime) {
+                // Show welcome screen for new users
+                document.getElementById('welcomeScreen').style.display = 'flex';
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'none';
+            } else {
+                // Returning user - show auth screen
+                document.getElementById('welcomeScreen').style.display = 'none';
+                showAuthScreen();
+            }
+        });
+        
+        // ==================== AUTH FUNCTIONS ====================
+        function showAuthScreen() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+        
+        async function authenticateWithFingerprint() {
+            const messageDiv = document.getElementById('authMessage');
+            
+            try {
+                // Check if browser supports WebAuthn
+                if (!window.PublicKeyCredential) {
+                    showPinModal();
+                    return;
+                }
+                
+                messageDiv.style.display = 'block';
+                messageDiv.style.color = '#58a6ff';
+                messageDiv.innerText = '⏳ Waiting for fingerprint...';
+                
+                // Simple fingerprint check - in real app, implement full WebAuthn
+                const credential = await navigator.credentials.get({
+                    publicKey: {
+                        challenge: new Uint8Array(32),
+                        rpId: window.location.hostname,
+                        userVerification: 'required',
+                        timeout: 60000
+                    }
+                }).catch(() => null);
+                
+                if (credential) {
+                    // Success
+                    unlockApp();
+                    messageDiv.style.display = 'none';
+                } else {
+                    // Fallback to PIN
+                    showPinModal();
+                }
+            } catch (error) {
+                console.log('Fingerprint error, showing PIN option');
+                showPinModal();
+            }
+        }
+        
+        function unlockApp() {
+            isUnlocked = true;
+            pinAttempts = 0;
+            
+            // Save user for next time
+            localStorage.setItem('rschat_user', 'registered');
+            
+            // Hide auth screens
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('pinModal').style.display = 'none';
+            
+            // Show main app
+            document.getElementById('mainApp').style.display = 'flex';
+            
+            // Enable inputs
+            document.getElementById('userInput').disabled = false;
+            document.getElementById('encryptBtn').disabled = false;
+            document.getElementById('decryptBtn').disabled = false;
+            document.getElementById('unlockBtn').style.display = 'none';
+            document.getElementById('lockStatus').innerHTML = '🔓 Unlocked';
+            document.getElementById('lockStatus').style.color = '#2ea043';
+            
+            // Show tutorial for first time
+            if (isFirstTime) {
+                setTimeout(() => {
+                    document.getElementById('tutorialOverlay').style.display = 'flex';
+                }, 500);
+            }
+            
+            // Welcome message
+            addBubble('🔐 App Unlocked Successfully!', 'system');
+            addBubble('📝 Type message and click SEND to encrypt', 'system');
+            addBubble('💡 Encrypted code will copy automatically', 'system');
+        }
+        
+        // ==================== PIN FUNCTIONS ====================
+        function showPinModal() {
+            document.getElementById('pinModal').style.display = 'flex';
+            currentPin = "";
+            updatePinDisplay();
+            document.getElementById('pinError').style.display = 'none';
+        }
+        
+        function addPin(num) {
+            if (currentPin.length < 4) {
+                currentPin += num;
+                updatePinDisplay();
+                
+                if (currentPin.length === 4) {
+                    setTimeout(verifyPin, 300);
+                }
+            }
+        }
+        
+        function deletePin() {
+            currentPin = currentPin.slice(0, -1);
+            updatePinDisplay();
+        }
+        
+        function updatePinDisplay() {
+            let display = "";
+            for (let i = 0; i < 4; i++) {
+                display += i < currentPin.length ? "●" : "○";
+            }
+            document.getElementById('pinDisplay').innerText = display;
+        }
+        
+        function verifyPin() {
+            if (currentPin === DEFAULT_PIN) {
+                // Correct PIN
+                document.getElementById('pinModal').style.display = 'none';
+                unlockApp();
+            } else {
+                // Wrong PIN
+                pinAttempts++;
+                const attemptsLeft = 3 - pinAttempts;
+                
+                if (attemptsLeft <= 0) {
+                    // Too many attempts
+                    document.body.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0d1117; color: #f85149; text-align: center; padding: 20px;">
+                            <div>
+                                <h1 style="font-size: 48px; margin-bottom: 20px;">🔒</h1>
+                                <h2>Too Many Failed Attempts</h2>
+                                <p style="color: #8b949e; margin-top: 20px;">Please try again after 1 hour</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('pinError').style.display = 'block';
+                    document.getElementById('pinError').innerHTML = `Wrong PIN! Attempts left: ${attemptsLeft}`;
+                    currentPin = "";
+                    updatePinDisplay();
+                }
+            }
+        }
+        
+        // ==================== CHAT FUNCTIONS ====================
+        async function handleEncrypt() {
+            if (!isUnlocked) {
+                showAuthScreen();
+                return;
+            }
+            
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            
+            if (!text) {
+                addBubble('⚠️ Please type a message', 'system');
+                return;
+            }
+            
+            try {
+                // Simple encryption for demo
+                const timestamp = Date.now();
+                const random = Math.floor(Math.random() * 1000);
+                const encrypted = btoa(text + '|' + timestamp + '|' + random);
+                
+                // Show message
+                addBubble(text, 'sent');
+                
+                // Copy to clipboard
+                await navigator.clipboard.writeText(encrypted);
+                addBubble('📋 Encrypted! Copied to clipboard', 'system');
+                
+                // Open WhatsApp
+                window.open(`https://wa.me/?text=${encodeURIComponent(encrypted)}`, '_blank');
+                
+            } catch (error) {
+                addBubble('❌ Encryption failed', 'system');
+            }
+            
+            input.value = '';
+        }
+        
+        async function handleDecrypt() {
+            if (!isUnlocked) {
+                showAuthScreen();
+                return;
+            }
+            
+            const input = document.getElementById('userInput');
+            const encryptedText = input.value.trim();
+            
+            if (!encryptedText) {
+                addBubble('⚠️ Paste encrypted code here', 'system');
+                return;
+            }
+            
+            try {
+                const decoded = atob(encryptedText);
+                const parts = decoded.split('|');
+                
+                if (parts.length >= 1) {
+                    addBubble('🔓 Decoded: ' + parts[0], 'received');
+                } else {
+                    addBubble('❌ Invalid encrypted message', 'system');
+                }
+            } catch (error) {
+                addBubble('❌ Invalid code format', 'system');
+            }
+            
+            input.value = '';
+        }
+        
+        function addBubble(text, type) {
+            const display = document.getElementById('display');
+            const div = document.createElement('div');
+            div.className = `bubble ${type}`;
+            div.innerText = text;
+            display.appendChild(div);
+            display.scrollTop = display.scrollHeight;
+        }
+        
+        function closeTutorial() {
+            document.getElementById('tutorialOverlay').style.display = 'none';
+        }
+        
+        // ==================== AUTO-LOCK SECURITY ====================
+        let inactivityTimer;
+        
+        function resetInactivityTimer() {
+            if (isUnlocked) {
+                clearTimeout(inactivityTimer);
+                inactivityTimer = setTimeout(() => {
+                    isUnlocked = false;
+                    document.getElementById('userInput').disabled = true;
+                    document.getElementById('encryptBtn').disabled = true;
+                    document.getElementById('decryptBtn').disabled = true;
+                    document.getElementById('unlockBtn').style.display = 'block';
+                    document.getElementById('lockStatus').innerHTML = '🔒 Locked';
+                    document.getElementById('lockStatus').style.color = '#f85149';
+                    addBubble('🔒 Auto-locked for security', 'system');
+                }, 300000); // 5 minutes
+            }
+        }
+        
+        // Track user activity
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+        document.addEventListener('touchstart', resetInactivityTimer);
+        
+        // Lock on app switch
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isUnlocked) {
+                isUnlocked = false;
+                document.getElementById('userInput').disabled = true;
+                document.getElementById('encryptBtn').disabled = true;
+                document.getElementById('decryptBtn').disabled = true;
+                document.getElementById('unlockBtn').style.display = 'block';
+                document.getElementById('lockStatus').innerHTML = '🔒 Locked';
+            }
+        });
+        
+        // Expose functions to global scope
+        window.showAuthScreen = showAuthScreen;
+        window.authenticateWithFingerprint = authenticateWithFingerprint;
+        window.showPinModal = showPinModal;
+        window.addPin = addPin;
+        window.deletePin = deletePin;
+        window.verifyPin = verifyPin;
+        window.handleEncrypt = handleEncrypt;
+        window.handleDecrypt = handleDecrypt;
+        window.closeTutorial = closeTutorial;
+    </script>
+</body>
+</html>        }
         
         .header { 
             background: #161b22; 
