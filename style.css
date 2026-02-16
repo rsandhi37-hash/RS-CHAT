@@ -179,7 +179,7 @@ body {
     gap: 12px; 
 }
 
-.action-btn { 
+button.action-btn { 
     flex: 1; 
     padding: 14px; 
     border: none; 
@@ -191,7 +191,7 @@ body {
     transition: 0.2s;
 }
 
-.action-btn:active {
+button.action-btn:active {
     transform: scale(0.98);
     opacity: 0.9;
 }

@@ -26,20 +26,23 @@ window.addEventListener('beforeinstallprompt', (e) => {
     }
 });
 
-document.getElementById('btnInstall').addEventListener('click', async () => {
-    if (!deferredPrompt) {
-        alert('Browser menu se "Add to Home Screen" karein');
-        return;
-    }
-    
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-        deferredPrompt = null;
-        location.reload();
-    }
-});
+const btnInstall = document.getElementById('btnInstall');
+if(btnInstall) {
+    btnInstall.addEventListener('click', async () => {
+        if (!deferredPrompt) {
+            alert('Browser menu se "Add to Home Screen" karein');
+            return;
+        }
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+            deferredPrompt = null;
+            location.reload();
+        }
+    });
+}
 
 // ========== PAGE LOAD ==========
 window.addEventListener('load', () => {
@@ -52,17 +55,6 @@ window.addEventListener('load', () => {
     } else {
         document.getElementById('installPrompt').style.display = 'flex';
     }
-    
-    // Add event listeners for buttons
-    document.getElementById('encryptBtn').addEventListener('click', handleEncrypt);
-    document.getElementById('decryptBtn').addEventListener('click', handleDecrypt);
-    
-    // Enter key press
-    document.getElementById('userInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleEncrypt();
-        }
-    });
 });
 
 // ========== PIN KEYPAD FUNCTIONS ==========
@@ -149,7 +141,8 @@ function getSalt() {
 }
 
 function handleEncrypt() {
-    const text = document.getElementById('userInput').value.trim();
+    const textInput = document.getElementById('userInput');
+    const text = textInput.value.trim();
     if (!text) {
         alert('Please type a message!');
         return;
@@ -168,7 +161,7 @@ function handleEncrypt() {
     }
     
     addBubble(text, 'sent');
-    document.getElementById('userInput').value = '';
+    textInput.value = '';
     
     navigator.clipboard.writeText(encrypted).then(() => {
         console.log('Copied to clipboard!');
@@ -180,7 +173,8 @@ function handleEncrypt() {
 }
 
 function handleDecrypt() {
-    const input = document.getElementById('userInput').value.trim();
+    const inputField = document.getElementById('userInput');
+    const input = inputField.value.trim();
     if (!input) {
         alert('Please paste encrypted code!');
         return;
@@ -209,7 +203,7 @@ function handleDecrypt() {
         alert('❌ Invalid encrypted code!');
     }
     
-    document.getElementById('userInput').value = '';
+    inputField.value = '';
 }
 
 function addBubble(text, type) {
