@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rs-code-v2';
+const CACHE_NAME = 'rs-code-v3';
 const urlsToCache = [
   './',
   './index.html',
