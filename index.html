@@ -56,13 +56,14 @@
         .bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; word-wrap: break-word; line-height: 1.4; color: white;}
         .sent { background: #238636; align-self: flex-end; border-bottom-right-radius: 2px;}
         .received { background: #30363d; align-self: flex-start; border-bottom-left-radius: 2px;}
-        .controls { background: #161b22; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #30363d; }
-        #userInput { flex: 1; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 25px; color: white; outline: none; }
-        button.action-btn { padding: 12px 20px; border: none; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .controls { background: #161b22; padding: 15px; border-top: 1px solid #30363d; }
+        #userInput { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 25px; color: white; outline: none; margin-bottom: 10px;}
+        .btn-group { display: flex; gap: 10px; width: 100%; }
+        button.action-btn { flex: 1; padding: 12px 20px; border: none; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s;}
         button.action-btn:active { transform: scale(0.95); }
         .enc-btn { background: #238636; }
-        .dec-btn { background: #1f6feb; width: 100%; margin-top: 10px;}
-        .del { background: #da3633; width: 100%;}
+        .dec-btn { background: #1f6feb; }
+        .del-btn { background: #da3633; width: 100%; margin-top: 10px;}
 
         /* ========== DIALER ========== */
         .status-bar { text-align: center; padding: 10px; background: #21262d; font-size: 14px; }
@@ -78,7 +79,7 @@
         .contact-name { font-weight: bold; font-size: 16px; color: #fff;}
         .contact-num { font-size: 12px; color: #8b949e; margin-top: 3px;}
         .contact-actions { display: flex; gap: 10px; }
-        .icon-btn { background: #30363d; border: none; padding: 10px; border-radius: 50%; color: white; cursor: pointer; width: 40px; height: 40px; transition: 0.2s;}
+        .icon-btn { background: #30363d; border: none; padding: 10px; border-radius: 50%; color: white; cursor: pointer; width: 40px; height: 40px; transition: 0.2s; display: flex; justify-content: center; align-items: center;}
         .icon-btn:active { transform: scale(0.9); }
         .msg-btn { background: #1f6feb; }
         .call-btn-small { background: #238636; }
@@ -86,8 +87,9 @@
 
         /* ========== CALL SCREEN OVERLAY ========== */
         #call-screen { display:none; position:absolute; inset:0; background:#0d1117; z-index:1000; flex-direction:column; justify-content:center; align-items:center; }
-        .end-call-btn { background:#da3633; width:80px; height:80px; border-radius:50%; font-size:30px; color:white; border:none; cursor: pointer; box-shadow: 0 4px 15px rgba(218, 54, 51, 0.4); transition: 0.2s;}
-        .end-call-btn:active { transform: scale(0.9); }
+        .call-control-btn { width:70px; height:70px; border-radius:50%; font-size:30px; color:white; border:none; cursor:pointer; display:flex; justify-content:center; align-items:center; transition:0.2s;}
+        .call-control-btn:active { transform: scale(0.9); }
+        .call-control-small { width:60px; height:60px; font-size:24px; background:#30363d;}
     </style>
 </head>
 <body>
@@ -131,8 +133,11 @@
                 </div>
                 <div id="display"></div>
                 <div class="controls">
-                    <input type="text" id="userInput" placeholder="Type secure message..." autocomplete="off">
-                    <button class="action-btn enc-btn" onclick="sendSecureMessage()">📤 SEND</button>
+                    <input type="text" id="userInput" placeholder="Type message here..." autocomplete="off">
+                    <div class="btn-group">
+                        <button class="action-btn dec-btn" onclick="handleDecryptAction()">🔓 DECODE</button>
+                        <button class="action-btn enc-btn" onclick="handleEncryptAndSend()">🔒 ENCRYPT & SEND</button>
+                    </div>
                 </div>
             </div>
 
@@ -165,7 +170,7 @@
                     </div>
 
                     <button class="action-btn dec-btn" onclick="window.open('https://rehan-sandhi.blogspot.com/2026/02/my-license.html', '_blank')">📄 View License & Privacy</button>
-                    <button class="action-btn del" style="margin-top: 15px;" onclick="resetApp()">⚠️ Reset App Data</button>
+                    <button class="action-btn del-btn" onclick="resetApp()">⚠️ Reset App Data</button>
                 </div>
             </div>
         </div>
@@ -178,42 +183,56 @@
         </div>
 
         <div id="call-screen">
-            <h2 id="call-status" style="color:#8b949e;">Calling...</h2>
+            <h2 id="call-status" style="color:#8b949e;">Incoming Call...</h2>
             <h1 id="call-number" style="color:#58a6ff; font-size:40px; margin:20px 0;">000000</h1>
-            <button class="end-call-btn" onclick="endCall()">☎</button>
+            
+            <div id="incoming-controls" style="display:none; gap:30px; margin-top: 40px;">
+                <button class="call-control-btn" onclick="acceptCall()" style="background:#238636; box-shadow: 0 4px 15px rgba(35, 134, 54, 0.4);">📞</button>
+                <button class="call-control-btn" onclick="rejectCall()" style="background:#da3633; box-shadow: 0 4px 15px rgba(218, 54, 51, 0.4);">☎</button>
+            </div>
+
+            <div id="incall-controls" style="display:none; gap:20px; margin-top: 40px; flex-wrap: wrap; justify-content: center; max-width: 300px;">
+                <button class="call-control-btn call-control-small" id="btn-mute" onclick="toggleMute()">🎤</button>
+                <button class="call-control-btn call-control-small" id="btn-hold" onclick="toggleHold()">⏸</button>
+                <button class="call-control-btn call-control-small" onclick="alert('Web browsers route audio automatically.')">🔊</button>
+                <button onclick="endCall()" style="background:#da3633; width:100%; padding:15px; border-radius:25px; color:white; border:none; font-size:18px; font-weight:bold; cursor:pointer; margin-top:10px;">☎ END CALL</button>
+            </div>
         </div>
         
         <audio id="remote-audio" autoplay></audio>
     </div>
 
     <script>
-        // --- FIREBASE CONFIGURATION (Dhyan se apni details dalein) ---
+        // --- 1. FIREBASE CONFIGURATION (YAHAN DETAILS DALEIN) ---
         const firebaseConfig = {
-            apiKey: "AIzaSyATj8d5b_Q2znosQ-keboTbakCF6D5Bso8",
-  authDomain: "rs-chat-f7450.firebaseapp.com",
-  projectId: "rs-chat-f7450",
-  storageBucket: "rs-chat-f7450.firebasestorage.app",
-  messagingSenderId: "681262682206",
-  appId: "1:681262682206:web:0fbb4e86157dfdb6f0e4cf",
-  measurementId: "G-WQ33YZE4M4"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- ENCRYPTION CONFIG ---
+        // --- 2. ORIGINAL ENCRYPTION CONFIG ---
         const MASTER_KEY = "REHAN_SANDHI_181";
-        const syms = ["%", "$", "#", "@", "!", "+", "×", "÷", "=", "?", ";", ":"];
+        const syms = ["%", "$", "#", "@", "!", "+", "×", "÷", "=", "?", ";", ":", "•", "~", "_", "/"];
         const separator = "§";
 
-        // --- GLOBAL VARIABLES ---
+        // --- 3. GLOBAL VARIABLES ---
         let myPhoneId = localStorage.getItem('rs_my_phone') || "";
         let isBiometricSetup = localStorage.getItem('rs_biometrics_setup') === 'true';
         let currentChatTarget = ""; 
         let contacts = JSON.parse(localStorage.getItem('rs_contacts')) || [];
-        let peer, localStream, currentCall;
+        
+        // WebRTC Variables
+        let peer, localStream, currentCall, pendingCall;
+        let isMuted = false, isHolding = false;
         let deferredPrompt;
 
-        // --- PWA SERVICE WORKER & INSTALL ---
+        // --- 4. PWA SERVICE WORKER & INSTALL ---
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
         }
@@ -235,14 +254,13 @@
             });
         }
 
-        // --- APP INITIALIZATION ---
+        // --- 5. APP INITIALIZATION & AUTH SCREEN ---
         window.addEventListener('load', () => {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            if (isStandalone) {
+            if (isStandalone || window.location.hostname === "localhost" || window.location.hostname.includes("github.io")) {
                 document.getElementById('installPrompt').style.display = 'none';
                 document.getElementById('authScreen').style.display = 'flex';
                 
-                // Adjust UI based on registration status
                 if(isBiometricSetup && myPhoneId) {
                     document.getElementById('loginPhone').style.display = 'none';
                     document.getElementById('authMessage').innerText = "Welcome back! Please verify to unlock.";
@@ -253,8 +271,7 @@
             }
         });
 
-        // --- BIOMETRIC / SCREEN LOCK LOGIC (WebAuthn) ---
-        // Helpers for converting Buffer <-> Base64
+        // Biometric / Screen Lock Auth (WebAuthn)
         function bufferToBase64(buffer) { return btoa(String.fromCharCode(...new Uint8Array(buffer))); }
         function base64ToBuffer(base64) {
             const binary = atob(base64); const bytes = new Uint8Array(binary.length);
@@ -274,12 +291,11 @@
             window.crypto.getRandomValues(challenge);
 
             if (!isBiometricSetup) {
-                // Register Fingerprint / Screen Lock
                 try {
                     const credential = await navigator.credentials.create({
                         publicKey: {
                             challenge: challenge,
-                            rp: { name: "RS Chat Secure" }, // Domain is automatically matched
+                            rp: { name: "RS Chat Secure" },
                             user: { id: new Uint8Array(16), name: myPhoneId, displayName: "RS User" },
                             pubKeyCredParams: [{ type: "public-key", alg: -7 }],
                             authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
@@ -291,11 +307,8 @@
                         localStorage.setItem('rs_cred_id', bufferToBase64(credential.rawId));
                         unlockApp();
                     }
-                } catch(e) { 
-                    alert("Setup Failed! Ensure your device has a Screen Lock or Fingerprint set. Error: " + e.message); 
-                }
+                } catch(e) { alert("Setup Failed! Ensure your device has a Screen Lock or Fingerprint set. Use HTTPS. Error: " + e.message); }
             } else {
-                // Verify Fingerprint / Screen Lock
                 try {
                     const credId = base64ToBuffer(localStorage.getItem('rs_cred_id'));
                     const assertion = await navigator.credentials.get({
@@ -307,9 +320,7 @@
                         }
                     });
                     if(assertion) unlockApp();
-                } catch(e) { 
-                    alert("Authentication Failed! " + e.message); 
-                }
+                } catch(e) { alert("Authentication Failed! " + e.message); }
             }
         }
 
@@ -321,65 +332,65 @@
             loadChatsList();
         }
 
-// --- NAVIGATION (FIXED) ---
-function switchTab(tabId) {
-    // 1. Sabhi views se active class aur inline styles hata dein
-    document.querySelectorAll('.app-view').forEach(v => {
-        v.classList.remove('active-view');
-        v.style.display = ''; // BUG FIX: Ye line purane inline display ko saaf kar degi
-    });
-    
-    // 2. Sabhi nav buttons se active class hata dein
-    document.querySelectorAll('.nav-item').forEach(n => {
-        n.classList.remove('active-nav');
-    });
-    
-    // 3. Sirf naye clicked tab par active class lagayein
-    document.getElementById('view-' + tabId).classList.add('active-view');
-    
-    // 4. Active chat screen par bottom nav hide karein, baaki par show karein
-    document.getElementById('bottom-nav').style.display = (tabId === 'active-chat') ? 'none' : 'flex';
-    
-    // 5. Data load karein
-    if(tabId === 'contacts') loadContacts();
-    if(tabId === 'chats') loadChatsList();
-}
+        // --- 6. TAB NAVIGATION (Glitch Fixed) ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.app-view').forEach(v => {
+                v.classList.remove('active-view');
+                v.style.display = ''; // Removes conflicting inline styles
+            });
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            
+            document.getElementById('view-' + tabId).classList.add('active-view');
+            document.getElementById('bottom-nav').style.display = (tabId === 'active-chat') ? 'none' : 'flex';
+            
+            if(tabId === 'contacts') loadContacts();
+            if(tabId === 'chats') loadChatsList();
+        }
 
+        // --- 7. ORIGINAL ENCRYPTION LOGIC RESTORED ---
+        function getWeight() {
+            let w = 0;
+            for (let i = 0; i < MASTER_KEY.length; i++) w += MASTER_KEY.charCodeAt(i);
+            return w;
+        }
 
-        // --- ENCRYPTION LOGIC ---
+        function getSalt() {
+            const d = new Date();
+            return d.getHours() + Math.floor(d.getMinutes() / 10);
+        }
+
         function rsEncrypt(text) {
-            const salt = new Date().getHours();
+            const salt = getSalt();
+            const weight = getWeight();
             let encrypted = '';
             for (let i = 0; i < text.length; i++) {
-                const hex = (text.charCodeAt(i) + salt).toString(16);
-                encrypted += syms[Math.floor(Math.random()*syms.length)] + hex + separator;
+                const charCode = text.charCodeAt(i);
+                const hex = (charCode + salt + weight).toString(16);
+                const randomSym1 = syms[Math.floor(Math.random() * syms.length)];
+                const randomSym2 = syms[Math.floor(Math.random() * syms.length)];
+                encrypted += randomSym1 + hex + randomSym2 + separator;
             }
             return encrypted;
         }
 
         function rsDecrypt(input) {
-            const salt = new Date().getHours();
+            const salt = getSalt();
+            const weight = getWeight();
             let decrypted = '';
             try {
                 const segments = input.split(separator);
                 segments.forEach(seg => {
                     const hexMatch = seg.match(/[0-9a-fA-F]+/);
-                    if (hexMatch) decrypted += String.fromCharCode(parseInt(hexMatch[0], 16) - salt);
+                    if (hexMatch) {
+                        const charCode = parseInt(hexMatch[0], 16) - salt - weight;
+                        decrypted += String.fromCharCode(charCode);
+                    }
                 });
-                return decrypted;
-            } catch (e) { return "🔒 [Encrypted]"; }
+                return decrypted || "🔒 [Empty Message]";
+            } catch (e) { return "🔒 [Encrypted Data Error]"; }
         }
 
-        function addBubble(text, type) {
-            const display = document.getElementById('display');
-            const bubble = document.createElement('div');
-            bubble.className = `bubble ${type}`;
-            bubble.textContent = text;
-            display.appendChild(bubble);
-            display.scrollTop = display.scrollHeight;
-        }
-
-        // --- FIREBASE MESSAGING ---
+        // --- 8. FIREBASE CHAT & MESSAGE DELETE LOGIC ---
         function openChat(targetNumber, targetName) {
             currentChatTarget = targetNumber;
             document.getElementById('active-chat-name').innerText = targetName || targetNumber;
@@ -388,28 +399,77 @@ function switchTab(tabId) {
             
             const chatID = myPhoneId > targetNumber ? myPhoneId + "_" + targetNumber : targetNumber + "_" + myPhoneId;
             db.ref('messages/' + chatID).off(); 
+            
             db.ref('messages/' + chatID).on('child_added', (snapshot) => {
                 const msgData = snapshot.val();
+                const msgKey = snapshot.key;
                 const type = msgData.sender === myPhoneId ? 'sent' : 'received';
-                addBubble(rsDecrypt(msgData.text), type);
+                addBubble(rsDecrypt(msgData.text), type, msgKey, chatID);
+            });
+
+            db.ref('messages/' + chatID).on('child_removed', (snapshot) => {
+                const deletedBubble = document.getElementById('msg-' + snapshot.key);
+                if(deletedBubble) deletedBubble.remove();
             });
         }
 
-        function sendSecureMessage() {
+        function handleEncryptAndSend() {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
-            if (!text || !currentChatTarget) return;
+            if (!text || !currentChatTarget) return alert("Type a message to encrypt and send!");
 
+            const encryptedText = rsEncrypt(text);
             const chatID = myPhoneId > currentChatTarget ? myPhoneId + "_" + currentChatTarget : currentChatTarget + "_" + myPhoneId;
+            
             db.ref('messages/' + chatID).push({
                 sender: myPhoneId,
-                text: rsEncrypt(text),
+                text: encryptedText,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
             input.value = '';
         }
 
-        // --- CONTACTS & CHAT LIST ---
+        function handleDecryptAction() {
+            const inputField = document.getElementById('userInput');
+            const input = inputField.value.trim();
+            if (!input) return alert('Please paste encrypted code in the text box!');
+            const decrypted = rsDecrypt(input);
+            alert("🔓 Decoded Message:\n\n" + decrypted);
+            inputField.value = '';
+        }
+
+        function addBubble(text, type, msgKey, chatID) {
+            const display = document.getElementById('display');
+            
+            const wrapper = document.createElement('div');
+            wrapper.id = 'msg-' + msgKey;
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = type === 'sent' ? 'row-reverse' : 'row';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '10px';
+
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${type}`;
+            bubble.textContent = text;
+            
+            // Delete Feature for sent messages
+            if(type === 'sent') {
+                const delBtn = document.createElement('span');
+                delBtn.innerHTML = '🗑';
+                delBtn.style.cursor = 'pointer';
+                delBtn.style.color = '#da3633';
+                delBtn.onclick = () => {
+                    if(confirm("Delete this message?")) db.ref('messages/' + chatID + '/' + msgKey).remove();
+                };
+                wrapper.appendChild(delBtn);
+            }
+
+            wrapper.appendChild(bubble);
+            display.appendChild(wrapper);
+            display.scrollTop = display.scrollHeight;
+        }
+
+        // --- 9. CONTACTS & HOME CHAT LIST ---
         function loadContacts() {
             const list = document.getElementById('contacts-list');
             list.innerHTML = contacts.length === 0 ? '<p style="text-align:center; color:#8b949e;">No contacts saved.</p>' : '';
@@ -443,7 +503,7 @@ function switchTab(tabId) {
             });
         }
 
-        // --- DIALER HELPER ---
+        // Dialer Helper
         const dialInput = document.getElementById('dial-input');
         dialInput.addEventListener('input', () => {
             document.getElementById('save-contact-btn').style.display = dialInput.value.length >= 10 ? 'inline-block' : 'none';
@@ -461,7 +521,7 @@ function switchTab(tabId) {
             }
         }
 
-        // --- WEBRTC CALLING ---
+        // --- 10. WEBRTC CALLING (Accept/Reject & Mute/Hold Fixes) ---
         function initWebRTC() {
             peer = new Peer(myPhoneId);
             navigator.mediaDevices.getUserMedia({ video: false, audio: true })
@@ -469,16 +529,36 @@ function switchTab(tabId) {
                 .catch(err => console.error("Mic error", err));
 
             peer.on('call', call => {
-                call.answer(localStream);
-                currentCall = call;
+                pendingCall = call; 
                 const callerName = contacts.find(c => c.number === call.peer)?.name || call.peer;
-                showCallScreen(callerName, "Incoming Call...");
-                call.on('stream', remoteStream => {
-                    document.getElementById('remote-audio').srcObject = remoteStream;
-                    document.getElementById('call-status').innerText = "Connected 🟢";
-                });
-                call.on('close', hideCallScreen);
+                
+                document.getElementById('call-screen').style.display = 'flex';
+                document.getElementById('call-number').innerText = callerName;
+                document.getElementById('call-status').innerText = "Incoming Call...";
+                document.getElementById('incoming-controls').style.display = 'flex';
+                document.getElementById('incall-controls').style.display = 'none';
             });
+        }
+
+        function acceptCall() {
+            if(pendingCall && localStream) {
+                pendingCall.answer(localStream); 
+                currentCall = pendingCall;
+                
+                document.getElementById('incoming-controls').style.display = 'none';
+                document.getElementById('incall-controls').style.display = 'flex';
+                document.getElementById('call-status').innerText = "Connected 🟢";
+                
+                currentCall.on('stream', remoteStream => {
+                    document.getElementById('remote-audio').srcObject = remoteStream;
+                });
+                currentCall.on('close', hideCallScreen);
+            }
+        }
+
+        function rejectCall() {
+            if(pendingCall) pendingCall.close();
+            hideCallScreen();
         }
 
         function makeCallFromDialer() {
@@ -489,7 +569,13 @@ function switchTab(tabId) {
 
         function initiateCall(targetId, targetName) {
             if(!localStream) return alert("Microphone not ready.");
-            showCallScreen(targetName || targetId, "Calling...");
+            
+            document.getElementById('call-screen').style.display = 'flex';
+            document.getElementById('call-number').innerText = targetName || targetId;
+            document.getElementById('call-status').innerText = "Calling...";
+            document.getElementById('incoming-controls').style.display = 'none';
+            document.getElementById('incall-controls').style.display = 'flex'; 
+            
             currentCall = peer.call(targetId, localStream);
             currentCall.on('stream', remoteStream => {
                 document.getElementById('remote-audio').srcObject = remoteStream;
@@ -498,23 +584,42 @@ function switchTab(tabId) {
             currentCall.on('close', hideCallScreen);
         }
 
+        function toggleMute() {
+            if(localStream) {
+                isMuted = !isMuted;
+                localStream.getAudioTracks()[0].enabled = !isMuted;
+                document.getElementById('btn-mute').style.background = isMuted ? '#da3633' : '#30363d';
+            }
+        }
+
+        function toggleHold() {
+            if(currentCall) {
+                isHolding = !isHolding;
+                localStream.getAudioTracks()[0].enabled = !isHolding; 
+                document.getElementById('remote-audio').muted = isHolding; 
+                document.getElementById('btn-hold').style.background = isHolding ? '#da3633' : '#30363d';
+                document.getElementById('call-status').innerText = isHolding ? "Call on Hold ⏸" : "Connected 🟢";
+            }
+        }
+
         function endCall() {
             if(currentCall) currentCall.close();
+            if(pendingCall) pendingCall.close();
             hideCallScreen();
         }
 
-        function showCallScreen(num, status) {
-            document.getElementById('call-screen').style.display = 'flex';
-            document.getElementById('call-number').innerText = num;
-            document.getElementById('call-status').innerText = status;
-        }
         function hideCallScreen() {
             document.getElementById('call-screen').style.display = 'none';
+            isMuted = false; isHolding = false;
+            if(localStream) localStream.getAudioTracks()[0].enabled = true;
+            document.getElementById('remote-audio').muted = false;
+            document.getElementById('btn-mute').style.background = '#30363d';
+            document.getElementById('btn-hold').style.background = '#30363d';
         }
 
-        // --- RESET DATA ---
+        // --- 11. RESET APP ---
         function resetApp() {
-            if(confirm("Are you sure? This deletes ALL app data including Fingerprint Setup.")) {
+            if(confirm("Are you sure? This deletes ALL data including Contacts and Fingerprint Setup.")) {
                 localStorage.clear();
                 location.reload();
             }
