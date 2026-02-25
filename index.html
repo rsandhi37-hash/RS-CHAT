@@ -190,12 +190,12 @@
         // --- FIREBASE CONFIGURATION (Dhyan se apni details dalein) ---
         const firebaseConfig = {
             apiKey: "AIzaSyATj8d5b_Q2znosQ-keboTbakCF6D5Bso8",
-            authDomain: "rs-chat-f7450.firebaseapp.com",
-            projectId: "rs-chat-f7450",
-            storageBucket: "rs-chat-f7450.firebasestorage.app",
-            messagingSenderId: "681262682206",
-            appId: "1:681262682206:web:0fbb4e86157dfdb6f0e4cf",
-            measurementId: "G-WQ33YZE4M4"
+  authDomain: "rs-chat-f7450.firebaseapp.com",
+  projectId: "rs-chat-f7450",
+  storageBucket: "rs-chat-f7450.firebasestorage.app",
+  messagingSenderId: "681262682206",
+  appId: "1:681262682206:web:0fbb4e86157dfdb6f0e4cf",
+  measurementId: "G-WQ33YZE4M4"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -321,18 +321,30 @@
             loadChatsList();
         }
 
-        // --- NAVIGATION ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-            document.getElementById('view-' + tabId).style.display = 'flex';
-            document.getElementById('view-' + tabId).classList.add('active-view');
-            
-            document.getElementById('bottom-nav').style.display = (tabId === 'active-chat') ? 'none' : 'flex';
-            
-            if(tabId === 'contacts') loadContacts();
-            if(tabId === 'chats') loadChatsList();
-        }
+// --- NAVIGATION (FIXED) ---
+function switchTab(tabId) {
+    // 1. Sabhi views se active class aur inline styles hata dein
+    document.querySelectorAll('.app-view').forEach(v => {
+        v.classList.remove('active-view');
+        v.style.display = ''; // BUG FIX: Ye line purane inline display ko saaf kar degi
+    });
+    
+    // 2. Sabhi nav buttons se active class hata dein
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.remove('active-nav');
+    });
+    
+    // 3. Sirf naye clicked tab par active class lagayein
+    document.getElementById('view-' + tabId).classList.add('active-view');
+    
+    // 4. Active chat screen par bottom nav hide karein, baaki par show karein
+    document.getElementById('bottom-nav').style.display = (tabId === 'active-chat') ? 'none' : 'flex';
+    
+    // 5. Data load karein
+    if(tabId === 'contacts') loadContacts();
+    if(tabId === 'chats') loadChatsList();
+}
+
 
         // --- ENCRYPTION LOGIC ---
         function rsEncrypt(text) {
