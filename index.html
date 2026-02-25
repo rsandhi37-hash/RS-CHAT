@@ -5,130 +5,508 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RS Chat Secure</title>
     
-    <meta property="og:title" content="RS Chat Secure">
-    <meta property="og:description" content="Ultra-Secure Terminal by Rehan Sandhi">
-    <meta property="og:image" content="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s16000/16471.jpg">
-    <meta property="og:url" content="https://rsandhi37-hash.github.io/RS-CHAT/">
-
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d1117">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s192/16471.jpg">
     
-    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<div id="mainApp">
-    <div class="header">⚡ RS CHAT & CALL // SECURE ⚡</div>
-    
-    <div class="views-container">
-        
-        <div id="view-chat" class="app-view active-view">
-            <div id="display"></div>
-            <div class="chat-controls">
-                <input type="text" id="userInput" placeholder="Type message here..." autocomplete="off">
-                <div class="btn-group">
-                    <button class="action-btn dec-btn" onclick="handleDecrypt()">🔓 DECODE</button>
-                    <button class="action-btn enc-btn" onclick="handleEncrypt()">🔒 ENCRYPT</button>
-                </div>
-            </div>
-        </div>
+    <style>
+        /* ========== GLOBAL STYLES ========== */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0d1117; color: #c9d1d9; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        <div id="view-dialer" class="app-view">
-            <div class="status-bar">My RS Number: <span id="my-rs-number" style="color:#58a6ff;">Loading...</span></div>
-            <div class="dial-display-area">
-                <input type="text" id="dial-input" readonly placeholder="Enter 6-digit ID">
-                <button class="save-contact-btn" id="save-contact-btn" onclick="saveContactPrompt()" style="display:none;">+ Add Contact</button>
-            </div>
-            <div class="keypad">
-                <div class="pin-key" onclick="pressKey('1')">1</div>
-                <div class="pin-key" onclick="pressKey('2')">2</div>
-                <div class="pin-key" onclick="pressKey('3')">3</div>
-                <div class="pin-key" onclick="pressKey('4')">4</div>
-                <div class="pin-key" onclick="pressKey('5')">5</div>
-                <div class="pin-key" onclick="pressKey('6')">6</div>
-                <div class="pin-key" onclick="pressKey('7')">7</div>
-                <div class="pin-key" onclick="pressKey('8')">8</div>
-                <div class="pin-key" onclick="pressKey('9')">9</div>
-                <div class="pin-key" onclick="pressKey('*')">*</div>
-                <div class="pin-key" onclick="pressKey('0')">0</div>
-                <div class="pin-key del" onclick="deleteKey()">⌫</div>
-            </div>
-            <button class="action-btn enc-btn" onclick="makeCallFromDialer()" style="margin: 20px; font-size: 18px;">📞 SECURE CALL</button>
-        </div>
+        /* ========== AUTH & INSTALL SCREENS ========== */
+        #installPrompt { position: fixed; inset: 0; background: #0d1117; display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; text-align: center; }
+        .install-card { background: #161b22; border: 2px solid #58a6ff; border-radius: 20px; padding: 40px; max-width: 400px; }
+        .install-button { background: #238636; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%; }
 
-        <div id="view-contacts" class="app-view">
-            <h3 style="padding: 15px; color:#58a6ff; border-bottom: 1px solid #30363d;">Contacts</h3>
-            <div id="contacts-list" style="padding: 10px;"></div>
-        </div>
+        #authScreen { position: fixed; inset: 0; background: #0d1117; display: flex; justify-content: center; align-items: center; z-index: 9000; }
+        .auth-container { background: #161b22; padding: 40px 30px; border-radius: 20px; width: 90%; max-width: 350px; border: 1px solid #30363d; text-align: center; }
+        .auth-icon { font-size: 60px; margin-bottom: 20px; display: block; }
+        .auth-input { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 10px; border: 1px solid #30363d; background: #0d1117; color: #58a6ff; text-align: center; font-size: 18px; outline: none; }
+        .auth-btn { background: #238636; color: white; border: none; padding: 15px; font-size: 16px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .auth-btn:active { transform: scale(0.95); }
 
-        <div id="view-settings" class="app-view">
-            <div class="settings-card">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s192/16471.jpg" alt="Logo" style="width: 80px; border-radius: 20px; margin-bottom: 15px;">
-                <h2 style="color: #58a6ff;">RS Chat Secure</h2>
-                <p style="color: #8b949e; margin-bottom: 20px;">Developer: Rehan Sandhi</p>
-                
-                <div style="text-align: left; background: #0d1117; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <p>📧 rsandhi37@gmail.com</p>
-                    <p>📞 +91 97259 36153</p>
-                    <p>📱 IG: rehan_sandhi_181</p>
-                </div>
-                
-                <button class="action-btn dec-btn" onclick="window.open('https://rehan-sandhi.blogspot.com/2026/02/my-license.html', '_blank')">📄 View License & Privacy</button>
-                <button class="action-btn del" style="margin-top: 15px; background: #da3633;" onclick="resetApp()">⚠️ Reset App Data</button>
-            </div>
-        </div>
+        /* ========== MAIN APP & VIEWS ========== */
+        #mainApp { display: none; height: 100vh; flex-direction: column; position: relative;}
+        .header { background: #161b22; color: #58a6ff; padding: 20px; text-align: center; font-weight: bold; border-bottom: 1px solid #30363d; font-size: 18px;}
+        .views-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;}
+        .app-view { display: none; flex: 1; flex-direction: column; overflow-y: auto; }
+        .active-view { display: flex; }
 
-    </div>
+        /* Bottom Nav */
+        .bottom-nav { display: flex; justify-content: space-around; background: #161b22; border-top: 1px solid #30363d; padding: 10px 0 20px 0; }
+        .nav-item { background: none; border: none; color: #8b949e; cursor: pointer; font-size: 14px; flex: 1; transition: 0.2s;}
+        .active-nav { color: #58a6ff; font-weight: bold; }
 
-    <div class="bottom-nav">
-        <button class="nav-item active-nav" onclick="switchTab('chat')">💬<br>Chat</button>
-        <button class="nav-item" onclick="switchTab('dialer')">🔢<br>Dialer</button>
-        <button class="nav-item" onclick="switchTab('contacts')">👤<br>Contacts</button>
-        <button class="nav-item" onclick="switchTab('settings')">⚙️<br>Settings</button>
-    </div>
+        /* ========== CHATS & MESSAGING ========== */
+        .chat-list-item { display: flex; padding: 15px; border-bottom: 1px solid #21262d; cursor: pointer; align-items: center;}
+        .chat-avatar { width: 45px; height: 45px; border-radius: 50%; background: #30363d; display: flex; justify-content: center; align-items: center; font-size: 20px; margin-right: 15px;}
+        .chat-info { flex: 1; }
+        .chat-name { font-weight: bold; color: #fff; font-size: 16px; margin-bottom: 3px;}
+        .chat-last-msg { color: #8b949e; font-size: 13px; }
 
-    <div id="call-screen" style="display:none;">
-        <h2 id="call-status">Calling...</h2>
-        <h1 id="call-number" style="color:#58a6ff; font-size:40px; margin: 20px 0;">000000</h1>
-        <button class="pin-key del" onclick="endCall()" style="width: 80px; height: 80px; border-radius: 50%; font-size: 30px;">☎</button>
-    </div>
-    
-    <audio id="remote-audio" autoplay></audio>
-</div>
+        .chat-header { background: #161b22; padding: 15px; border-bottom: 1px solid #30363d; display: flex; align-items: center;}
+        #display { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #0d1117;}
+        .bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; word-wrap: break-word; line-height: 1.4; color: white;}
+        .sent { background: #238636; align-self: flex-end; border-bottom-right-radius: 2px;}
+        .received { background: #30363d; align-self: flex-start; border-bottom-left-radius: 2px;}
+        .controls { background: #161b22; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #30363d; }
+        #userInput { flex: 1; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 25px; color: white; outline: none; }
+        button.action-btn { padding: 12px 20px; border: none; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        button.action-btn:active { transform: scale(0.95); }
+        .enc-btn { background: #238636; }
+        .dec-btn { background: #1f6feb; width: 100%; margin-top: 10px;}
+        .del { background: #da3633; width: 100%;}
 
+        /* ========== DIALER ========== */
+        .status-bar { text-align: center; padding: 10px; background: #21262d; font-size: 14px; }
+        .dial-display-area { padding: 30px 20px; text-align: center; }
+        #dial-input { background: transparent; border: none; color: white; font-size: 36px; text-align: center; width: 100%; outline: none; letter-spacing: 2px; }
+        .save-contact-btn { background: #1f6feb; color: white; border: none; padding: 8px 15px; border-radius: 15px; margin-top: 10px; cursor: pointer;}
+        .dialer-actions { display: flex; justify-content: center; width: 100%; margin-top: 20px; }
+        .call-btn-large { background: #238636; color: white; border: none; width: 75px; height: 75px; border-radius: 50%; font-size: 32px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(35, 134, 54, 0.4); transition: 0.2s;}
+        .call-btn-large:active { transform: scale(0.92); background: #2ea043;}
+
+        /* ========== CONTACTS & SETTINGS ========== */
+        .contact-card { background: #21262d; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .contact-name { font-weight: bold; font-size: 16px; color: #fff;}
+        .contact-num { font-size: 12px; color: #8b949e; margin-top: 3px;}
+        .contact-actions { display: flex; gap: 10px; }
+        .icon-btn { background: #30363d; border: none; padding: 10px; border-radius: 50%; color: white; cursor: pointer; width: 40px; height: 40px; transition: 0.2s;}
+        .icon-btn:active { transform: scale(0.9); }
+        .msg-btn { background: #1f6feb; }
+        .call-btn-small { background: #238636; }
+        .settings-card { padding: 30px; text-align: center; }
+
+        /* ========== CALL SCREEN OVERLAY ========== */
+        #call-screen { display:none; position:absolute; inset:0; background:#0d1117; z-index:1000; flex-direction:column; justify-content:center; align-items:center; }
+        .end-call-btn { background:#da3633; width:80px; height:80px; border-radius:50%; font-size:30px; color:white; border:none; cursor: pointer; box-shadow: 0 4px 15px rgba(218, 54, 51, 0.4); transition: 0.2s;}
+        .end-call-btn:active { transform: scale(0.9); }
+    </style>
 </head>
 <body>
+
     <div id="installPrompt">
         <div class="install-card">
             <h2 style="color: #58a6ff;">🔐 RS CHAT SECURE</h2>
-            <p style="margin: 15px 0; color: #8b949e;">Install karein private chat ke liye</p>
+            <p style="margin: 15px 0; color: #8b949e;">Install karein private app ke liye</p>
             <button class="install-button" id="btnInstall">📲 INSTALL APP</button>
             <p style="margin-top: 15px; font-size: 12px; color: #6e7681;">Ya browser menu se "Add to Home Screen" karein</p>
         </div>
     </div>
 
-    <div id="pinScreen">
-        <div class="pin-container">
-            <h3 style="text-align: center; margin-bottom: 15px; color: #58a6ff;">ENTER PIN</h3>
-            <div class="pin-display" id="pinDisplay">○○○○</div>
-            <div class="pin-keypad" id="keypad"></div>
+    <div id="authScreen">
+        <div class="auth-container">
+            <span class="auth-icon">👆</span>
+            <h3 style="color: #58a6ff; margin-bottom: 10px;">RS SECURE LOGIN</h3>
+            <p style="font-size: 12px; color:#8b949e; margin-bottom:20px;" id="authMessage">Fingerprint or Screen Lock Required</p>
+            
+            <input type="tel" id="loginPhone" class="auth-input" placeholder="Enter Phone Number">
+            <button class="auth-btn" id="authButton" onclick="handleBiometricAuth()">
+                🔒 Unlock with Fingerprint
+            </button>
         </div>
     </div>
 
     <div id="mainApp">
-        <div class="header">⚡ RS CHAT // SECURE TERMINAL ⚡</div>
-        <div id="display"></div>
-        <div class="controls">
-            <input type="text" id="userInput" placeholder="Type message here..." autocomplete="off">
-            <div class="btn-group">
-                <button class="action-btn dec-btn" onclick="handleDecrypt()">🔓 DECODE</button>
-                <button class="action-btn enc-btn" onclick="handleEncrypt()">🔒 ENCRYPT & SEND</button>
+        <div class="header">⚡ RS CHAT SECURE ⚡</div>
+        
+        <div class="views-container">
+            <div id="view-chats" class="app-view active-view">
+                <div id="chats-list">
+                    <p style="text-align:center; color:#8b949e; margin-top:20px;">No recent chats. Go to Contacts to start messaging.</p>
+                </div>
+            </div>
+
+            <div id="view-active-chat" class="app-view" style="z-index: 50;">
+                <div class="chat-header">
+                    <button onclick="switchTab('chats')" style="background:none; border:none; color:#58a6ff; font-size:20px; cursor: pointer;">⬅</button>
+                    <span id="active-chat-name" style="font-weight:bold; color:white; margin-left:15px;">User</span>
+                </div>
+                <div id="display"></div>
+                <div class="controls">
+                    <input type="text" id="userInput" placeholder="Type secure message..." autocomplete="off">
+                    <button class="action-btn enc-btn" onclick="sendSecureMessage()">📤 SEND</button>
+                </div>
+            </div>
+
+            <div id="view-dialer" class="app-view">
+                <div class="status-bar">My ID: <span id="my-rs-number" style="color:#58a6ff;">Loading...</span></div>
+                <div class="dial-display-area">
+                    <input type="tel" id="dial-input" placeholder="Enter Number">
+                    <button class="save-contact-btn" id="save-contact-btn" onclick="saveContactPrompt()" style="display:none;">+ Add Contact</button>
+                </div>
+                <div class="dialer-actions" style="margin-top:40px;">
+                    <button class="call-btn-large" onclick="makeCallFromDialer()">📞</button>
+                </div>
+            </div>
+
+            <div id="view-contacts" class="app-view">
+                <h3 style="padding: 15px; color:#58a6ff; border-bottom: 1px solid #30363d;">My Contacts</h3>
+                <div id="contacts-list" style="padding: 10px;"></div>
+            </div>
+
+            <div id="view-settings" class="app-view">
+                <div class="settings-card">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s192/16471.jpg" alt="Logo" style="width: 80px; border-radius: 20px; margin-bottom: 15px;">
+                    <h2 style="color: #58a6ff;">RS Chat Secure</h2>
+                    <p style="color: #8b949e; margin-bottom: 20px;">Developer: Rehan Sandhi</p>
+                    
+                    <div style="text-align: left; background: #0d1117; padding: 15px; border-radius: 10px; margin-bottom: 20px; color: #c9d1d9;">
+                        <p>📧 rsandhi37@gmail.com</p>
+                        <p>📞 +91 97259 36153</p>
+                        <p>📱 IG: rehan_sandhi_181</p>
+                    </div>
+
+                    <button class="action-btn dec-btn" onclick="window.open('https://rehan-sandhi.blogspot.com/2026/02/my-license.html', '_blank')">📄 View License & Privacy</button>
+                    <button class="action-btn del" style="margin-top: 15px;" onclick="resetApp()">⚠️ Reset App Data</button>
+                </div>
             </div>
         </div>
+
+        <div class="bottom-nav" id="bottom-nav">
+            <button class="nav-item active-nav" onclick="switchTab('chats')">💬<br>Chats</button>
+            <button class="nav-item" onclick="switchTab('dialer')">🔢<br>Dialer</button>
+            <button class="nav-item" onclick="switchTab('contacts')">👤<br>Contacts</button>
+            <button class="nav-item" onclick="switchTab('settings')">⚙️<br>Settings</button>
+        </div>
+
+        <div id="call-screen">
+            <h2 id="call-status" style="color:#8b949e;">Calling...</h2>
+            <h1 id="call-number" style="color:#58a6ff; font-size:40px; margin:20px 0;">000000</h1>
+            <button class="end-call-btn" onclick="endCall()">☎</button>
+        </div>
+        
+        <audio id="remote-audio" autoplay></audio>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // --- FIREBASE CONFIGURATION (Dhyan se apni details dalein) ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- ENCRYPTION CONFIG ---
+        const MASTER_KEY = "REHAN_SANDHI_181";
+        const syms = ["%", "$", "#", "@", "!", "+", "×", "÷", "=", "?", ";", ":"];
+        const separator = "§";
+
+        // --- GLOBAL VARIABLES ---
+        let myPhoneId = localStorage.getItem('rs_my_phone') || "";
+        let isBiometricSetup = localStorage.getItem('rs_biometrics_setup') === 'true';
+        let currentChatTarget = ""; 
+        let contacts = JSON.parse(localStorage.getItem('rs_contacts')) || [];
+        let peer, localStream, currentCall;
+        let deferredPrompt;
+
+        // --- PWA SERVICE WORKER & INSTALL ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); deferredPrompt = e;
+            if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+                document.getElementById('installPrompt').style.display = 'flex';
+            }
+        });
+
+        const btnInstall = document.getElementById('btnInstall');
+        if(btnInstall) {
+            btnInstall.addEventListener('click', async () => {
+                if (!deferredPrompt) return alert('Browser menu se "Add to Home Screen" karein');
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') { deferredPrompt = null; location.reload(); }
+            });
+        }
+
+        // --- APP INITIALIZATION ---
+        window.addEventListener('load', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isStandalone) {
+                document.getElementById('installPrompt').style.display = 'none';
+                document.getElementById('authScreen').style.display = 'flex';
+                
+                // Adjust UI based on registration status
+                if(isBiometricSetup && myPhoneId) {
+                    document.getElementById('loginPhone').style.display = 'none';
+                    document.getElementById('authMessage').innerText = "Welcome back! Please verify to unlock.";
+                    document.getElementById('authButton').innerHTML = "🔓 Verify Identity";
+                }
+            } else {
+                document.getElementById('installPrompt').style.display = 'flex';
+            }
+        });
+
+        // --- BIOMETRIC / SCREEN LOCK LOGIC (WebAuthn) ---
+        // Helpers for converting Buffer <-> Base64
+        function bufferToBase64(buffer) { return btoa(String.fromCharCode(...new Uint8Array(buffer))); }
+        function base64ToBuffer(base64) {
+            const binary = atob(base64); const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes.buffer;
+        }
+
+        async function handleBiometricAuth() {
+            const phoneInput = document.getElementById('loginPhone');
+            if(!isBiometricSetup) {
+                if(phoneInput.value.trim().length < 10) return alert("Please enter your Phone Number first.");
+                myPhoneId = phoneInput.value.trim();
+                localStorage.setItem('rs_my_phone', myPhoneId);
+            }
+
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+
+            if (!isBiometricSetup) {
+                // Register Fingerprint / Screen Lock
+                try {
+                    const credential = await navigator.credentials.create({
+                        publicKey: {
+                            challenge: challenge,
+                            rp: { name: "RS Chat Secure" }, // Domain is automatically matched
+                            user: { id: new Uint8Array(16), name: myPhoneId, displayName: "RS User" },
+                            pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                            timeout: 60000
+                        }
+                    });
+                    if(credential) {
+                        localStorage.setItem('rs_biometrics_setup', 'true');
+                        localStorage.setItem('rs_cred_id', bufferToBase64(credential.rawId));
+                        unlockApp();
+                    }
+                } catch(e) { 
+                    alert("Setup Failed! Ensure your device has a Screen Lock or Fingerprint set. Error: " + e.message); 
+                }
+            } else {
+                // Verify Fingerprint / Screen Lock
+                try {
+                    const credId = base64ToBuffer(localStorage.getItem('rs_cred_id'));
+                    const assertion = await navigator.credentials.get({
+                        publicKey: {
+                            challenge: challenge,
+                            allowCredentials: [{ type: "public-key", id: credId }],
+                            userVerification: "required",
+                            timeout: 60000
+                        }
+                    });
+                    if(assertion) unlockApp();
+                } catch(e) { 
+                    alert("Authentication Failed! " + e.message); 
+                }
+            }
+        }
+
+        function unlockApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+            document.getElementById('my-rs-number').innerText = myPhoneId;
+            initWebRTC();
+            loadChatsList();
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            document.getElementById('view-' + tabId).style.display = 'flex';
+            document.getElementById('view-' + tabId).classList.add('active-view');
+            
+            document.getElementById('bottom-nav').style.display = (tabId === 'active-chat') ? 'none' : 'flex';
+            
+            if(tabId === 'contacts') loadContacts();
+            if(tabId === 'chats') loadChatsList();
+        }
+
+        // --- ENCRYPTION LOGIC ---
+        function rsEncrypt(text) {
+            const salt = new Date().getHours();
+            let encrypted = '';
+            for (let i = 0; i < text.length; i++) {
+                const hex = (text.charCodeAt(i) + salt).toString(16);
+                encrypted += syms[Math.floor(Math.random()*syms.length)] + hex + separator;
+            }
+            return encrypted;
+        }
+
+        function rsDecrypt(input) {
+            const salt = new Date().getHours();
+            let decrypted = '';
+            try {
+                const segments = input.split(separator);
+                segments.forEach(seg => {
+                    const hexMatch = seg.match(/[0-9a-fA-F]+/);
+                    if (hexMatch) decrypted += String.fromCharCode(parseInt(hexMatch[0], 16) - salt);
+                });
+                return decrypted;
+            } catch (e) { return "🔒 [Encrypted]"; }
+        }
+
+        function addBubble(text, type) {
+            const display = document.getElementById('display');
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${type}`;
+            bubble.textContent = text;
+            display.appendChild(bubble);
+            display.scrollTop = display.scrollHeight;
+        }
+
+        // --- FIREBASE MESSAGING ---
+        function openChat(targetNumber, targetName) {
+            currentChatTarget = targetNumber;
+            document.getElementById('active-chat-name').innerText = targetName || targetNumber;
+            document.getElementById('display').innerHTML = ""; 
+            switchTab('active-chat');
+            
+            const chatID = myPhoneId > targetNumber ? myPhoneId + "_" + targetNumber : targetNumber + "_" + myPhoneId;
+            db.ref('messages/' + chatID).off(); 
+            db.ref('messages/' + chatID).on('child_added', (snapshot) => {
+                const msgData = snapshot.val();
+                const type = msgData.sender === myPhoneId ? 'sent' : 'received';
+                addBubble(rsDecrypt(msgData.text), type);
+            });
+        }
+
+        function sendSecureMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text || !currentChatTarget) return;
+
+            const chatID = myPhoneId > currentChatTarget ? myPhoneId + "_" + currentChatTarget : currentChatTarget + "_" + myPhoneId;
+            db.ref('messages/' + chatID).push({
+                sender: myPhoneId,
+                text: rsEncrypt(text),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            input.value = '';
+        }
+
+        // --- CONTACTS & CHAT LIST ---
+        function loadContacts() {
+            const list = document.getElementById('contacts-list');
+            list.innerHTML = contacts.length === 0 ? '<p style="text-align:center; color:#8b949e;">No contacts saved.</p>' : '';
+            contacts.forEach(c => {
+                list.innerHTML += `
+                    <div class="contact-card">
+                        <div>
+                            <div class="contact-name">${c.name}</div>
+                            <div class="contact-num">${c.number}</div>
+                        </div>
+                        <div class="contact-actions">
+                            <button class="icon-btn msg-btn" onclick="openChat('${c.number}', '${c.name}')">💬</button>
+                            <button class="icon-btn call-btn-small" onclick="initiateCall('${c.number}', '${c.name}')">📞</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function loadChatsList() {
+            const list = document.getElementById('chats-list');
+            list.innerHTML = contacts.length === 0 ? '<p style="text-align:center; color:#8b949e; margin-top:20px;">Add contacts to start chatting.</p>' : '';
+            contacts.forEach(c => {
+                list.innerHTML += `
+                    <div class="chat-list-item" onclick="openChat('${c.number}', '${c.name}')">
+                        <div class="chat-avatar">${c.name.charAt(0)}</div>
+                        <div class="chat-info">
+                            <div class="chat-name">${c.name}</div>
+                            <div class="chat-last-msg">Tap to open secure chat</div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // --- DIALER HELPER ---
+        const dialInput = document.getElementById('dial-input');
+        dialInput.addEventListener('input', () => {
+            document.getElementById('save-contact-btn').style.display = dialInput.value.length >= 10 ? 'inline-block' : 'none';
+        });
+
+        function saveContactPrompt() {
+            const num = dialInput.value;
+            const name = prompt("Enter Name for " + num + ":");
+            if(name) {
+                contacts.push({ name, number: num });
+                localStorage.setItem('rs_contacts', JSON.stringify(contacts));
+                alert("Contact Saved!");
+                document.getElementById('save-contact-btn').style.display = 'none';
+                dialInput.value = "";
+            }
+        }
+
+        // --- WEBRTC CALLING ---
+        function initWebRTC() {
+            peer = new Peer(myPhoneId);
+            navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+                .then(stream => { localStream = stream; })
+                .catch(err => console.error("Mic error", err));
+
+            peer.on('call', call => {
+                call.answer(localStream);
+                currentCall = call;
+                const callerName = contacts.find(c => c.number === call.peer)?.name || call.peer;
+                showCallScreen(callerName, "Incoming Call...");
+                call.on('stream', remoteStream => {
+                    document.getElementById('remote-audio').srcObject = remoteStream;
+                    document.getElementById('call-status').innerText = "Connected 🟢";
+                });
+                call.on('close', hideCallScreen);
+            });
+        }
+
+        function makeCallFromDialer() {
+            const num = dialInput.value;
+            if(num.length >= 10) initiateCall(num, num);
+            else alert("Enter valid Number");
+        }
+
+        function initiateCall(targetId, targetName) {
+            if(!localStream) return alert("Microphone not ready.");
+            showCallScreen(targetName || targetId, "Calling...");
+            currentCall = peer.call(targetId, localStream);
+            currentCall.on('stream', remoteStream => {
+                document.getElementById('remote-audio').srcObject = remoteStream;
+                document.getElementById('call-status').innerText = "Connected 🟢";
+            });
+            currentCall.on('close', hideCallScreen);
+        }
+
+        function endCall() {
+            if(currentCall) currentCall.close();
+            hideCallScreen();
+        }
+
+        function showCallScreen(num, status) {
+            document.getElementById('call-screen').style.display = 'flex';
+            document.getElementById('call-number').innerText = num;
+            document.getElementById('call-status').innerText = status;
+        }
+        function hideCallScreen() {
+            document.getElementById('call-screen').style.display = 'none';
+        }
+
+        // --- RESET DATA ---
+        function resetApp() {
+            if(confirm("Are you sure? This deletes ALL app data including Fingerprint Setup.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    </script>
 </body>
 </html>
