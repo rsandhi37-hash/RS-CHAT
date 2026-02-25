@@ -214,3 +214,133 @@ function addBubble(text, type) {
     display.appendChild(bubble);
     display.scrollTop = display.scrollHeight;
 }
+// ========== UI NAVIGATION ==========
+function switchTab(tabId) {
+    document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+    
+    document.getElementById('view-' + tabId).classList.add('active-view');
+    event.currentTarget.classList.add('active-nav');
+    
+    if(tabId === 'contacts') loadContacts();
+}
+
+// ========== CALLING & PEERJS LOGIC ==========
+let peer, localStream, currentCall;
+let myRSNumber = localStorage.getItem('rs_my_number');
+let contacts = JSON.parse(localStorage.getItem('rs_contacts')) || [];
+
+// PIN Unlock hone ke baad RS Number generate/check karein
+const originalVerifyPin = verifyPin;
+verifyPin = function() {
+    originalVerifyPin();
+    if(isUnlocked) {
+        initWebRTC();
+    }
+}
+
+function initWebRTC() {
+    if(!myRSNumber) {
+        myRSNumber = Math.floor(100000 + Math.random() * 900000).toString(); // Generate random 6-digit
+        localStorage.setItem('rs_my_number', myRSNumber);
+    }
+    document.getElementById('my-rs-number').innerText = myRSNumber;
+
+    peer = new Peer(myRSNumber);
+    
+    navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+        .then(stream => { localStream = stream; })
+        .catch(err => console.error("Mic error", err));
+
+    peer.on('call', call => {
+        call.answer(localStream);
+        currentCall = call;
+        showCallScreen(call.peer, "Incoming Call...");
+        call.on('stream', remoteStream => {
+            document.getElementById('remote-audio').srcObject = remoteStream;
+            document.getElementById('call-status').innerText = "Connected 🟢";
+        });
+        call.on('close', hideCallScreen);
+    });
+}
+
+// --- DIALER FUNCTIONS ---
+const dialInput = document.getElementById('dial-input');
+function pressKey(num) {
+    if(dialInput.value.length < 6) { 
+        dialInput.value += num; 
+        document.getElementById('save-contact-btn').style.display = dialInput.value.length === 6 ? 'inline-block' : 'none';
+    }
+}
+function deleteKey() {
+    dialInput.value = dialInput.value.slice(0, -1);
+    document.getElementById('save-contact-btn').style.display = dialInput.value.length === 6 ? 'inline-block' : 'none';
+}
+
+function makeCallFromDialer() {
+    const num = dialInput.value;
+    if(num.length === 6) initiateCall(num);
+    else alert("Enter 6-digit RS Number");
+}
+
+function initiateCall(targetId) {
+    if(!localStream) return alert("Microphone not ready.");
+    showCallScreen(targetId, "Calling...");
+    currentCall = peer.call(targetId, localStream);
+    currentCall.on('stream', remoteStream => {
+        document.getElementById('remote-audio').srcObject = remoteStream;
+        document.getElementById('call-status').innerText = "Connected 🟢";
+    });
+    currentCall.on('close', hideCallScreen);
+}
+
+function endCall() {
+    if(currentCall) currentCall.close();
+    hideCallScreen();
+}
+
+function showCallScreen(num, status) {
+    document.getElementById('call-screen').style.display = 'flex';
+    document.getElementById('call-number').innerText = num;
+    document.getElementById('call-status').innerText = status;
+}
+function hideCallScreen() {
+    document.getElementById('call-screen').style.display = 'none';
+    dialInput.value = '';
+    document.getElementById('save-contact-btn').style.display = 'none';
+}
+
+// --- CONTACTS & SETTINGS ---
+function saveContactPrompt() {
+    const num = dialInput.value;
+    const name = prompt("Enter Name for " + num + ":");
+    if(name) {
+        contacts.push({ name, number: num });
+        localStorage.setItem('rs_contacts', JSON.stringify(contacts));
+        alert("Contact Saved!");
+        document.getElementById('save-contact-btn').style.display = 'none';
+    }
+}
+
+function loadContacts() {
+    const list = document.getElementById('contacts-list');
+    list.innerHTML = contacts.length === 0 ? '<p style="text-align:center; color:#8b949e;">No contacts saved.</p>' : '';
+    contacts.forEach(c => {
+        list.innerHTML += `
+            <div class="contact-card">
+                <div>
+                    <div class="contact-name">${c.name}</div>
+                    <div class="contact-num">${c.number}</div>
+                </div>
+                <button class="call-btn-small" onclick="initiateCall('${c.number}')">📞</button>
+            </div>
+        `;
+    });
+}
+
+function resetApp() {
+    if(confirm("Are you sure? This will delete your custom ID and contacts.")) {
+        localStorage.clear();
+        location.reload();
+    }
+}

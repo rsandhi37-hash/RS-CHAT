@@ -17,6 +17,87 @@
     <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s192/16471.jpg">
     
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+<div id="mainApp">
+    <div class="header">⚡ RS CHAT & CALL // SECURE ⚡</div>
+    
+    <div class="views-container">
+        
+        <div id="view-chat" class="app-view active-view">
+            <div id="display"></div>
+            <div class="chat-controls">
+                <input type="text" id="userInput" placeholder="Type message here..." autocomplete="off">
+                <div class="btn-group">
+                    <button class="action-btn dec-btn" onclick="handleDecrypt()">🔓 DECODE</button>
+                    <button class="action-btn enc-btn" onclick="handleEncrypt()">🔒 ENCRYPT</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-dialer" class="app-view">
+            <div class="status-bar">My RS Number: <span id="my-rs-number" style="color:#58a6ff;">Loading...</span></div>
+            <div class="dial-display-area">
+                <input type="text" id="dial-input" readonly placeholder="Enter 6-digit ID">
+                <button class="save-contact-btn" id="save-contact-btn" onclick="saveContactPrompt()" style="display:none;">+ Add Contact</button>
+            </div>
+            <div class="keypad">
+                <div class="pin-key" onclick="pressKey('1')">1</div>
+                <div class="pin-key" onclick="pressKey('2')">2</div>
+                <div class="pin-key" onclick="pressKey('3')">3</div>
+                <div class="pin-key" onclick="pressKey('4')">4</div>
+                <div class="pin-key" onclick="pressKey('5')">5</div>
+                <div class="pin-key" onclick="pressKey('6')">6</div>
+                <div class="pin-key" onclick="pressKey('7')">7</div>
+                <div class="pin-key" onclick="pressKey('8')">8</div>
+                <div class="pin-key" onclick="pressKey('9')">9</div>
+                <div class="pin-key" onclick="pressKey('*')">*</div>
+                <div class="pin-key" onclick="pressKey('0')">0</div>
+                <div class="pin-key del" onclick="deleteKey()">⌫</div>
+            </div>
+            <button class="action-btn enc-btn" onclick="makeCallFromDialer()" style="margin: 20px; font-size: 18px;">📞 SECURE CALL</button>
+        </div>
+
+        <div id="view-contacts" class="app-view">
+            <h3 style="padding: 15px; color:#58a6ff; border-bottom: 1px solid #30363d;">Contacts</h3>
+            <div id="contacts-list" style="padding: 10px;"></div>
+        </div>
+
+        <div id="view-settings" class="app-view">
+            <div class="settings-card">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhBi6ygCLdTKWe2P6CHvFgPIwTXOh82nyVHHT7IONvyAb5Cf_dVuvk98xw65ldgWvbsD5AUXtm2tEqeOmzD-mGwgWxbgZM52Iub4LyS4Y_zTWxy-U4T9ejM7sIH5BzUgjfyATc1qoyWm2l6pr2m0TVQG36nGGPDe6Pq4GwXM-Ne73sfRI7vwXL9hfRpsCXs/s192/16471.jpg" alt="Logo" style="width: 80px; border-radius: 20px; margin-bottom: 15px;">
+                <h2 style="color: #58a6ff;">RS Chat Secure</h2>
+                <p style="color: #8b949e; margin-bottom: 20px;">Developer: Rehan Sandhi</p>
+                
+                <div style="text-align: left; background: #0d1117; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <p>📧 rsandhi37@gmail.com</p>
+                    <p>📞 +91 97259 36153</p>
+                    <p>📱 IG: rehan_sandhi_181</p>
+                </div>
+                
+                <button class="action-btn dec-btn" onclick="window.open('https://rehan-sandhi.blogspot.com/2026/02/my-license.html', '_blank')">📄 View License & Privacy</button>
+                <button class="action-btn del" style="margin-top: 15px; background: #da3633;" onclick="resetApp()">⚠️ Reset App Data</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item active-nav" onclick="switchTab('chat')">💬<br>Chat</button>
+        <button class="nav-item" onclick="switchTab('dialer')">🔢<br>Dialer</button>
+        <button class="nav-item" onclick="switchTab('contacts')">👤<br>Contacts</button>
+        <button class="nav-item" onclick="switchTab('settings')">⚙️<br>Settings</button>
+    </div>
+
+    <div id="call-screen" style="display:none;">
+        <h2 id="call-status">Calling...</h2>
+        <h1 id="call-number" style="color:#58a6ff; font-size:40px; margin: 20px 0;">000000</h1>
+        <button class="pin-key del" onclick="endCall()" style="width: 80px; height: 80px; border-radius: 50%; font-size: 30px;">☎</button>
+    </div>
+    
+    <audio id="remote-audio" autoplay></audio>
+</div>
+
 </head>
 <body>
     <div id="installPrompt">
